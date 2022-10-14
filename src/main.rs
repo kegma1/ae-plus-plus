@@ -22,6 +22,7 @@ impl std::fmt::Display for Type {
 #[derive(Debug, PartialEq, Eq)]
 enum Instructions {
     Literal(Type),
+
     Add,
     Sub,
     Mult,
@@ -53,7 +54,7 @@ fn main() {
     let args:Vec<String> = env::args().collect();
     let path = &args[1];
 
-    let mut ctx = Runtime::new();
+    let mut _ctx = Runtime::new();
 
     if let Ok(lines) = read_lines(path) {
         for line in lines {
@@ -69,6 +70,7 @@ fn parse(line: String) -> Result<Vec<Instructions>, &'static str> {
     
     for token in line.split(" ") {
         parsed_line.push(match token {
+            x if x.contains("#") => break,
             "toki" => Instructions::Print,
             "+" => Instructions::Add,
             "-" => Instructions::Sub,
