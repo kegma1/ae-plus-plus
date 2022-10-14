@@ -3,9 +3,10 @@ use std::io::{self, BufRead};
 use std::path::Path;
 use std::env;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 enum Type {
-    Number(i32),
+    Int(i32),
+    Float(f32),
     Bool(bool),
     // String
 }
@@ -13,13 +14,14 @@ enum Type {
 impl std::fmt::Display for Type {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Type::Number(x) => write!(f, "{}", x),
+            Type::Int(x) => write!(f, "{}", x),
+            Type::Float(x) => write!(f, "{}", x),
             Type::Bool(x) => write!(f, "{}", x)
         } 
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 enum Instructions {
     Literal(Type),
 
@@ -38,7 +40,7 @@ enum Instructions {
     Null
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 struct Runtime {
     stack: Vec<Type>
 }
@@ -54,11 +56,12 @@ fn main() {
     let args:Vec<String> = env::args().collect();
     let path = &args[1];
 
-    let mut _ctx = Runtime::new();
+    let mut ctx = Runtime::new();
 
     if let Ok(lines) = read_lines(path) {
         for line in lines {
             if let Ok(ip) = line {
+                // println!("{:?}", parse(ip).unwrap())
                 execute(&mut ctx, parse(ip).unwrap());
             }
         }
@@ -81,7 +84,8 @@ fn parse(line: String) -> Result<Vec<Instructions>, &'static str> {
             "en" => Instructions::And,
             "anu" => Instructions::Or,
             "lon" => Instructions::Literal(Type::Bool(true)),
-            x if x.parse::<i32>().is_ok() => Instructions::Literal(Type::Number(x.parse::<i32>().unwrap())),
+            x if x.parse::<i32>().is_ok() => Instructions::Literal(Type::Int(x.parse::<i32>().unwrap())),
+            x if x.parse::<f32>().is_ok() => Instructions::Literal(Type::Float(x.parse::<f32>().unwrap())),
             _ => Instructions::Null
         })
     }
@@ -96,37 +100,107 @@ fn execute(ctx: &mut Runtime, line: Vec<Instructions>) {
                 assert!(ctx.stack.len() >= 1);
 
                 let print_value = ctx.stack.pop().unwrap();
-                print!("{}", print_value)
+                println!("{}", print_value)
             },
             Instructions::Add => {
                 assert!(ctx.stack.len() >= 2);
-                let b = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                let a = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                ctx.stack.push(Type::Number(a + b));
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+
+                match a {
+                    Type::Int(x) => {
+                        let y = if let Type::Int(y) = b { y } else { panic!("not an Int")};
+                        ctx.stack.push(Type::Int(x + y));
+
+                    },
+                    Type::Float(x) => {
+                        let y = if let Type::Float(y) = b { y } else { panic!("not a Float")};
+                        ctx.stack.push(Type::Float(x + y));
+
+                    }
+                    _ => panic!("{:?} does not support add operator", a)
+                }
             },
             Instructions::Sub => {
                 assert!(ctx.stack.len() >= 2);
-                let b = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                let a = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                ctx.stack.push(Type::Number(a - b));
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+
+                match a {
+                    Type::Int(x) => {
+                        let y = if let Type::Int(y) = b { y } else { panic!("not an Int")};
+                        ctx.stack.push(Type::Int(x - y));
+
+                    },
+                    Type::Float(x) => {
+                        let y = if let Type::Float(y) = b { y } else { panic!("not a Float")};
+                        ctx.stack.push(Type::Float(x - y));
+
+                    }
+                    _ => panic!("{:?} does not support sub operator", a)
+                }
             },
             Instructions::Mult => {
                 assert!(ctx.stack.len() >= 2);
-                let b = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                let a = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                ctx.stack.push(Type::Number(a * b));
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+
+                match a {
+                    Type::Int(x) => {
+                        let y = if let Type::Int(y) = b { y } else { panic!("not an Int")};
+                        ctx.stack.push(Type::Int(x * y));
+
+                    },
+                    Type::Float(x) => {
+                        let y = if let Type::Float(y) = b { y } else { panic!("not a Float")};
+                        ctx.stack.push(Type::Float(x * y));
+
+                    }
+                    _ => panic!("{:?} does not support mult operator", a)
+                }
             },
             Instructions::Div => {
                 assert!(ctx.stack.len() >= 2);
-                let b = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                let a = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                ctx.stack.push(Type::Number(a / b));
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+
+                match a {
+                    Type::Int(x) => {
+                        let y = if let Type::Int(y) = b { y } else { panic!("not an Int")};
+                        ctx.stack.push(Type::Int(x / y));
+
+                    },
+                    Type::Float(x) => {
+                        let y = if let Type::Float(y) = b { y } else { panic!("not a Float")};
+                        ctx.stack.push(Type::Float(x / y));
+
+                    }
+                    _ => panic!("{:?} does not support div operator", a)
+                }
             },
             Instructions::Mod => {
                 assert!(ctx.stack.len() >= 2);
-                let b = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                let a = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                ctx.stack.push(Type::Number(a % b));
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+
+                match a {
+                    Type::Int(x) => {
+                        let y = if let Type::Int(y) = b { y } else { panic!("not an Int")};
+                        ctx.stack.push(Type::Int(x % y));
+
+                    },
+                    Type::Float(x) => {
+                        let y = if let Type::Float(y) = b { y } else { panic!("not a Float")};
+                        ctx.stack.push(Type::Float(x % y));
+
+                    }
+                    _ => panic!("{:?} does not support mod operator", a)
+                }
             }
             Instructions::Not => {
                 assert!(ctx.stack.len() >= 1);
