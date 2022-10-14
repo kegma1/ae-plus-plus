@@ -204,20 +204,39 @@ fn execute(ctx: &mut Runtime, line: Vec<Instructions>) {
             }
             Instructions::Not => {
                 assert!(ctx.stack.len() >= 1);
-                let b = if let Type::Bool(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                ctx.stack.push(Type::Bool(!b));
+                let b = ctx.stack.pop().unwrap();
+                match b {
+                    Type::Bool(x) => {
+                        ctx.stack.push(Type::Bool(!x));
+                    },
+                    _ => panic!("{:?} does not support not operator", b)
+                }
             },
             Instructions::And => {
                 assert!(ctx.stack.len() >= 2);
-                let b = if let Type::Bool(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                let a = if let Type::Bool(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                ctx.stack.push(Type::Bool(a && b));
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+                match a {
+                    Type::Bool(x) => {
+                        let y = if let Type::Bool(y) = b { y } else { panic!("not a Bool")};
+                        ctx.stack.push(Type::Bool(x && y));
+                    },
+                    _ => panic!("{:?} does not support and operator", a)
+                }
             },
             Instructions::Or => {
                 assert!(ctx.stack.len() >= 2);
-                let b = if let Type::Bool(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                let a = if let Type::Bool(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
-                ctx.stack.push(Type::Bool(a || b));
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+                match a {
+                    Type::Bool(x) => {
+                        let y = if let Type::Bool(y) = b { y } else { panic!("not a Bool")};
+                        ctx.stack.push(Type::Bool(x || y));
+                    },
+                    _ => panic!("{:?} does not support or operator", a)
+                }
             },
             Instructions::Literal(literal) => {
                 ctx.stack.push(literal)
