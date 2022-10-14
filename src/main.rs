@@ -24,10 +24,16 @@ enum Instructions {
     Literal(Type),
     Add,
     Sub,
+    Mult,
+    Div,
+    Mod,
+
     Print,
+
     Not,
     And,
     Or,
+
     Null
 }
 
@@ -66,6 +72,9 @@ fn parse(line: String) -> Result<Vec<Instructions>, &'static str> {
             "toki" => Instructions::Print,
             "+" => Instructions::Add,
             "-" => Instructions::Sub,
+            "*" => Instructions::Mult,
+            "/" => Instructions::Div,
+            "%" => Instructions::Mod,
             "ike" => Instructions::Not,
             "en" => Instructions::And,
             "anu" => Instructions::Or,
@@ -99,6 +108,24 @@ fn execute(ctx: &mut Runtime, line: Vec<Instructions>) {
                 let a = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
                 ctx.stack.push(Type::Number(a - b));
             },
+            Instructions::Mult => {
+                assert!(ctx.stack.len() >= 2);
+                let b = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
+                let a = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
+                ctx.stack.push(Type::Number(a * b));
+            },
+            Instructions::Div => {
+                assert!(ctx.stack.len() >= 2);
+                let b = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
+                let a = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
+                ctx.stack.push(Type::Number(a / b));
+            },
+            Instructions::Mod => {
+                assert!(ctx.stack.len() >= 2);
+                let b = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
+                let a = if let Type::Number(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
+                ctx.stack.push(Type::Number(a % b));
+            }
             Instructions::Not => {
                 assert!(ctx.stack.len() >= 1);
                 let b = if let Type::Bool(x) = ctx.stack.pop().unwrap() { x } else { panic!("emmm idk") };
