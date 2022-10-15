@@ -209,6 +209,9 @@ fn execute(ctx: &mut Runtime, line: Vec<Instructions>) {
                     Type::Bool(x) => {
                         ctx.stack.push(Type::Bool(!x));
                     },
+                    Type::Int(x) => {
+                        ctx.stack.push(Type::Int(!x));
+                    },
                     _ => panic!("{:?} does not support not operator", b)
                 }
             },
@@ -222,6 +225,10 @@ fn execute(ctx: &mut Runtime, line: Vec<Instructions>) {
                         let y = if let Type::Bool(y) = b { y } else { panic!("not a Bool")};
                         ctx.stack.push(Type::Bool(x && y));
                     },
+                    Type::Int(x) => {
+                        let y = if let Type::Int(y) = b { y } else { panic!("not a Int")};
+                        ctx.stack.push(Type::Int(x & y));
+                    }
                     _ => panic!("{:?} does not support and operator", a)
                 }
             },
@@ -235,6 +242,10 @@ fn execute(ctx: &mut Runtime, line: Vec<Instructions>) {
                         let y = if let Type::Bool(y) = b { y } else { panic!("not a Bool")};
                         ctx.stack.push(Type::Bool(x || y));
                     },
+                    Type::Int(x) => {
+                        let y = if let Type::Int(y) = b { y } else { panic!("not a Int")};
+                        ctx.stack.push(Type::Int(x | y));
+                    }
                     _ => panic!("{:?} does not support or operator", a)
                 }
             },
