@@ -69,8 +69,9 @@ fn main() {
     let mut ctx = Runtime::new();
 
     let lexed = lex(path);
-    let parsed = parse(lexed);
-    let _ = execute(&mut ctx, parsed.unwrap());
+    let mut parsed = parse(lexed).unwrap();
+    //println!("{:?}", cross_refeance(&mut parsed).unwrap());
+    let _ = execute(&mut ctx, cross_refeance(&mut parsed).unwrap());
 
     
 }
@@ -91,6 +92,25 @@ fn lex(path: &String) -> Result<Vec<(String, Pos)>, &'static str> {
     }
 
     Ok(prg)
+}
+
+fn cross_refeance(prg:&mut Vec<Lexeme>) -> Result<Vec<Lexeme>, &'static str>{
+    let mut stack: Vec<usize> = vec![];
+    for i in 0..prg.len() {
+        let token = prg[i].0.clone();
+        match token {
+            Instructions::If(_) => stack.push(i),
+            Instructions::End => {
+                let block_i = stack.pop().unwrap();
+                if prg[block_i].0 == Instructions::If(None) {
+                    prg[block_i].0 = Instructions::If(Some(i as u32));
+                }
+            }
+            _ => ()
+        }
+    }
+
+    Ok(prg.clone())
 }
 
 fn parse(prg: Result<Vec<(String, Pos)>, &'static str>) -> Result<Vec<Lexeme>, &'static str> {
@@ -120,28 +140,6 @@ fn parse(prg: Result<Vec<(String, Pos)>, &'static str>) -> Result<Vec<Lexeme>, &
             x if x.parse::<f32>().is_ok() => Instructions::Literal(Type::Float(x.parse::<f32>().unwrap())),
             _ => continue
         }, pos))
-    }
-
-    for i in 0..parsed_prg.len() {
-        let prg_copy = parsed_prg.clone();
-        let mut lexeme = &mut parsed_prg[i];
-        match lexeme.0 {
-            Instructions::If(_) => {
-                let mut count = 1;
-                let mut index = i + 1;
-                while count > 0 {
-                    let x = prg_copy[index].0.clone();
-                    if x == Instructions::If(None) {
-                        count += 1
-                    } else if x == Instructions::End {
-                        count -= 1
-                    }
-                    index += 1
-                }
-                lexeme.0 = Instructions::If(Some(index as u32))
-            },
-            _ => continue
-        }
     }
 
     Ok(parsed_prg)
@@ -327,6 +325,7 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
             },
             // Instructions::Null => {continue;}
         }
+        //println!("{:?}", token);
         i += 1;
     }
 }
