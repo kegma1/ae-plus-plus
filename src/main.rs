@@ -8,7 +8,7 @@ enum Type {
     Int(i32),
     Float(f32),
     Bool(bool),
-    // String
+    //String(&'static String)
 }
 
 impl std::fmt::Display for Type {
@@ -17,13 +17,22 @@ impl std::fmt::Display for Type {
             Type::Int(x) => write!(f, "{}", x),
             Type::Float(x) => write!(f, "{}", x),
             Type::Bool(x) => write!(f, "{}", x),
+            //Type::String(x) => write!(f, "{}", x),
         }
     }
 }
 
-type Pos = (u32, u32);
+
+type Pos = (usize, usize, String);
 type Lexeme = (Instructions, Pos);
 type Ptr = usize;
+
+macro_rules! printerr {
+    ($msg:expr,$tok:expr) => {
+        println!("ERROR: {} {}:{}:{}", $msg, $tok.2, $tok.0, $tok.1);
+        std::process::exit(0);
+    };
+}
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum Instructions {
@@ -73,7 +82,7 @@ fn main() {
 
     let lexed = lex(path);
     let mut parsed = parse(lexed).unwrap();
-    //println!("{:?}", cross_refeance(&mut parsed).unwrap());
+//    println!("{:?}", cross_refeance(&mut parsed).unwrap());
     let _ = execute(&mut ctx, cross_refeance(&mut parsed).unwrap());
 }
 
@@ -84,12 +93,14 @@ fn lex(path: &String) -> Result<Vec<(String, Pos)>, &'static str> {
         for (i, line) in lines.enumerate() {
             if let Ok(ip) = line {
                 let words = ip.split(' ');
-                for (j, word) in words.enumerate() {
+                let mut col = 1;
+                for word in words {
                     if word.contains('#') {
                         break;
                     }
 
-                    prg.push((String::from(word), (i as u32, j as u32)))
+                    prg.push((String::from(word), (i + 1 , col, path.clone())));
+                    col += word.len() + 1
                 }
             }
         }
@@ -171,16 +182,20 @@ fn parse(prg: Result<Vec<(String, Pos)>, &'static str>) -> Result<Vec<Lexeme>, &
 fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
     let mut i = 0;
     while i < prg.len() {
-        let (token, _pos) = prg[i];
+        let (token, pos) = &prg[i];
         match token {
             Instructions::Print => {
-                assert!(ctx.stack.len() >= 1, "Not enough arguments");
+                if ctx.stack.len() < 1 {
+                    printerr!("'toki' requiers 1 argument on the top of the stack", pos);
+                }
 
                 let print_value = ctx.stack.pop().unwrap();
                 println!("{}", print_value)
             }
             Instructions::Add => {
-                assert!(ctx.stack.len() >= 2, "Not enough arguments");
+                if ctx.stack.len() < 2 {
+                    printerr!("'+' requiers 2 arguments on the top of the stack", pos);
+                }
 
                 let b = ctx.stack.pop().unwrap();
                 let a = ctx.stack.pop().unwrap();
@@ -508,11 +523,11 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
             }
             Instructions::End(x) => {
                 if let Some(ptr) = x {
-                    i = ptr;
+                    i = *ptr;
                 }
             }
 
-            Instructions::Literal(literal) => ctx.stack.push(literal),
+            Instructions::Literal(literal) => ctx.stack.push(*literal),
             // Instructions::Null => {continue;}
         }
         //println!("{:?}", token);
