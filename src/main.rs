@@ -4,7 +4,7 @@ use std::path::Path;
 use std::env;
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 enum Type {
     Int(i32),
     Float(f32),
@@ -22,7 +22,11 @@ impl std::fmt::Display for Type {
     }
 }
 
-#[derive(Debug, PartialEq)]
+type Pos = (u32, u32);
+type Lexeme = (Instructions, Pos);
+type Ptr = u32;
+
+#[derive(Debug, PartialEq, Clone, Copy)]
 enum Instructions {
     Literal(Type),
     
@@ -38,14 +42,13 @@ enum Instructions {
     And,
     Or,
     
-    If,
+    If(Option<Ptr>),
     End,
     
-    Null
+    // Null
 }
 
-type Pos = (u32, u32);
-type Lexeme = (Instructions, Pos);
+
 
 #[derive(Debug, PartialEq)]
 struct Runtime {
@@ -67,7 +70,6 @@ fn main() {
 
     let lexed = lex(path);
     let parsed = parse(lexed);
-    println!("{:?}", parsed);
     let _ = execute(&mut ctx, parsed.unwrap());
 
     
@@ -80,11 +82,8 @@ fn lex(path: &String) -> Result<Vec<(String, Pos)>, &'static str> {
     if let Ok(lines) = read_lines(path) {
         for (i, line) in lines.enumerate() {
             if let Ok(ip) = line {
-                let _line_len = ip.len();
                 let words = ip.split(" ");
                 for (j, word) in words.enumerate() {
-                    let _word_len = word.len();
-                    
                     prg.push((String::from(word), (i as u32, j as u32)))
                 }
             }
@@ -115,20 +114,43 @@ fn parse(prg: Result<Vec<(String, Pos)>, &'static str>) -> Result<Vec<Lexeme>, &
             "en" => Instructions::And,
             "anu" => Instructions::Or,
             "lon" => Instructions::Literal(Type::Bool(true)),
-            "la" => Instructions::If,
+            "la" => Instructions::If(None),
             "pini" => Instructions::End,
             x if x.parse::<i32>().is_ok() => Instructions::Literal(Type::Int(x.parse::<i32>().unwrap())),
             x if x.parse::<f32>().is_ok() => Instructions::Literal(Type::Float(x.parse::<f32>().unwrap())),
-            _ => Instructions::Null
+            _ => continue
         }, pos))
     }
+
+    for i in 0..parsed_prg.len() {
+        let prg_copy = parsed_prg.clone();
+        let mut lexeme = &mut parsed_prg[i];
+        match lexeme.0 {
+            Instructions::If(_) => {
+                let mut count = 1;
+                let mut index = i + 1;
+                while count > 0 {
+                    let x = prg_copy[index].0.clone();
+                    if x == Instructions::If(None) {
+                        count += 1
+                    } else if x == Instructions::End {
+                        count -= 1
+                    }
+                    index += 1
+                }
+                lexeme.0 = Instructions::If(Some(index as u32))
+            },
+            _ => continue
+        }
+    }
+
     Ok(parsed_prg)
 }
 
 fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
-
-
-    for (token, _pos) in prg {
+    let mut i = 0;
+    while i < prg.len() {
+        let (token, _pos) = prg[i];
         match token {
             Instructions::Print => {
                 assert!(ctx.stack.len() >= 1, "Not enough arguments");
@@ -283,23 +305,29 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("{:?} does not support or operator", a)
                 }
             },
-            Instructions::If => {
+            Instructions::If(x) => {
                 assert!(ctx.stack.len() >= 1, "Not enough arguments");
                 let b = ctx.stack.pop().unwrap();
                 match b {
-                    Type::Bool(_x) => {
-                        continue;
+                    Type::Bool(val) => {
+                        if val {
+                            i += 1;
+                            continue;
+                        } else {
+                            i = x.expect("no matching pini") as usize - 1;
+                        }
                     },
-                    _ => panic!("{:?} does not support or operator", b)
+                    _ => panic!("{:?} does not support if operator", b)
                 }
             },
-            Instructions::End => {continue;},
+            Instructions::End => (),
 
             Instructions::Literal(literal) => {
                 ctx.stack.push(literal)
             },
-            Instructions::Null => {continue;}
+            // Instructions::Null => {continue;}
         }
+        i += 1;
     }
 }
 
