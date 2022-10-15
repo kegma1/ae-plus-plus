@@ -83,9 +83,9 @@ fn lex(path: &String) -> Result<Vec<(String, Pos)>, &'static str> {
     if let Ok(lines) = read_lines(path) {
         for (i, line) in lines.enumerate() {
             if let Ok(ip) = line {
-                let words = ip.split(" ");
+                let words = ip.split(' ');
                 for (j, word) in words.enumerate() {
-                    if word.contains("#") {
+                    if word.contains('#') {
                         break;
                     }
 
@@ -371,7 +371,7 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     }
                     _ => panic!("{:?} does not support or operator", a),
                 }
-            },
+            }
             Instructions::Eq => {
                 assert!(ctx.stack.len() >= 2, "Not enough arguments");
 
@@ -385,7 +385,7 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                             panic!("not a Bool")
                         };
                         ctx.stack.push(Type::Bool(x == y));
-                    },
+                    }
                     Type::Int(x) => {
                         let y = if let Type::Int(y) = b {
                             y
@@ -393,7 +393,7 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                             panic!("not a Int")
                         };
                         ctx.stack.push(Type::Bool(x == y));
-                    },
+                    }
                     Type::Float(x) => {
                         let y = if let Type::Float(y) = b {
                             y
@@ -401,9 +401,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                             panic!("not a Int")
                         };
                         ctx.stack.push(Type::Bool(x == y));
-                    },
+                    }
                 }
-            },
+            }
             Instructions::Lt => {
                 assert!(ctx.stack.len() >= 2, "Not enough arguments");
 
@@ -417,7 +417,7 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                             panic!("not a Bool")
                         };
                         ctx.stack.push(Type::Bool(x < y));
-                    },
+                    }
                     Type::Int(x) => {
                         let y = if let Type::Int(y) = b {
                             y
@@ -425,7 +425,7 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                             panic!("not a Int")
                         };
                         ctx.stack.push(Type::Bool(x < y));
-                    },
+                    }
                     Type::Float(x) => {
                         let y = if let Type::Float(y) = b {
                             y
@@ -433,9 +433,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                             panic!("not a Int")
                         };
                         ctx.stack.push(Type::Bool(x < y));
-                    },
+                    }
                 }
-            },
+            }
             Instructions::Gt => {
                 assert!(ctx.stack.len() >= 2, "Not enough arguments");
 
@@ -449,7 +449,7 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                             panic!("not a Bool")
                         };
                         ctx.stack.push(Type::Bool(x > y));
-                    },
+                    }
                     Type::Int(x) => {
                         let y = if let Type::Int(y) = b {
                             y
@@ -457,7 +457,7 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                             panic!("not a Int")
                         };
                         ctx.stack.push(Type::Bool(x > y));
-                    },
+                    }
                     Type::Float(x) => {
                         let y = if let Type::Float(y) = b {
                             y
@@ -465,7 +465,7 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                             panic!("not a Int")
                         };
                         ctx.stack.push(Type::Bool(x > y));
-                    },
+                    }
                 }
             }
             Instructions::Dup => {
@@ -499,10 +499,8 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                         if val {
                             i += 1;
                             continue;
-                        } else {
-                            if let Some(ptr) = x {
-                                i = ptr + 1
-                            }
+                        } else if let Some(ptr) = x {
+                            i = ptr + 1
                         }
                     }
                     _ => panic!("{:?} does not support do operator", b),
