@@ -1,0 +1,12 @@
+# int
+
+1 tenpo sin 16 > pali
+    sin 3 / pakala 0 = la
+        "Fizz" toki
+    ante-la sin 5 / pakala 0 = la
+        "Buzz" toki
+    ante-la
+        sin toki
+    pini
+    1 +
+pini
