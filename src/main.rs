@@ -61,6 +61,7 @@ enum Instructions {
 
     Dup,
     Drop,
+    Swap,
     // Null
 }
 
@@ -87,7 +88,7 @@ fn main() {
 
     let lexed = lex(path);
     let mut parsed = parse(lexed, &mut ctx).unwrap();
-    println!("{:?}", cross_refeance(&mut parsed).unwrap());
+//    println!("{:?}", cross_refeance(&mut parsed).unwrap());
     let _ = execute(&mut ctx, cross_refeance(&mut parsed).unwrap());
 }
 
@@ -127,7 +128,7 @@ fn cross_refeance(prg: &mut Vec<Lexeme>) -> Result<Vec<Lexeme>, &'static str> {
             Instructions::Else(_) => {
                 let if_i = stack.pop().unwrap();
                 if let Instructions::If(_) = prg[if_i].0 {
-                    prg[if_i].0 = Instructions::If(Some(i));
+                    prg[if_i].0 = Instructions::If(Some(i + 1));
                     stack.push(i)
                 } else { printerr!("'ante-la' can only close 'la' blocks", prg[if_i].1); }
             }
@@ -156,7 +157,13 @@ fn cross_refeance(prg: &mut Vec<Lexeme>) -> Result<Vec<Lexeme>, &'static str> {
 
     Ok(prg.clone())
 }
-
+fn strip_quotes(str:String) -> String {
+    let mut chars = str.chars();
+    chars.next();
+    chars.next_back();
+    chars.next_back();
+    chars.as_str().to_string()
+}
 // https://github.com/ttm/tokipona/blob/master/data/toki-pona_english.txt
 
 fn parse(prg: Result<Vec<(String, Pos)>, &'static str>, ctx: &mut Runtime) -> Result<Vec<Lexeme>, &'static str> {
@@ -190,6 +197,7 @@ fn parse(prg: Result<Vec<(String, Pos)>, &'static str>, ctx: &mut Runtime) -> Re
                     "tenpo" => Instructions::While,
                     "sin" => Instructions::Dup,
                     "pakala" => Instructions::Drop,
+                    "esun" => Instructions::Swap,
                     "=" => Instructions::Eq,
                     ">" => Instructions::Lt,
                     "<" => Instructions::Gt,
@@ -209,7 +217,8 @@ fn parse(prg: Result<Vec<(String, Pos)>, &'static str>, ctx: &mut Runtime) -> Re
                             j += 1;
                         }
                         i = j;
-                        ctx.str_heap.push(String::from(str));
+
+                        ctx.str_heap.push(strip_quotes(str));
                         let i = ctx.str_heap.len() - 1;
                         Instructions::Literal(Type::Str(i))
                     },
@@ -542,6 +551,16 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                 }
 
                 let _ = ctx.stack.pop().unwrap();
+            }
+            Instructions::Swap => {
+                if ctx.stack.len() < 2 {
+                    printerr!("'ensu' requiers 2 arguments on the top of the stack", pos);
+                }
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+                ctx.stack.push(b);
+                ctx.stack.push(a);
             }
             Instructions::If(x) => {
                 if ctx.stack.len() < 1 {
