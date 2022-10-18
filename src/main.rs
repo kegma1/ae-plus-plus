@@ -273,6 +273,18 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                         };
                         ctx.stack.push(Type::Float(x + y));
                     }
+                    Type::Str(x) => {
+                        let y = if let Type::Str(y) = b {
+                            y
+                        } else {
+                            panic!("not a Float")
+                        };
+
+                        let x_val = ctx.str_heap[x].clone();
+                        let y_val = ctx.str_heap[y].clone();
+                        ctx.str_heap.push(x_val + &y_val);
+                        ctx.stack.push(Type::Str(ctx.str_heap.len() - 1));
+                    },
                     _ => panic!("{:?} does not support add operator", a),
                 }
             }
