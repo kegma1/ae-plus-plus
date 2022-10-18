@@ -2,6 +2,7 @@ use std::env;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use snailquote::unescape;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum Type {
@@ -92,30 +93,41 @@ fn main() {
     let _ = execute(&mut ctx, cross_refeance(&mut parsed).unwrap());
 }
 
+enum Mode {
+    Normal,
+    String
+}
+
 fn lex(path: &String) -> Result<Vec<(String, Pos)>, &'static str> {
     let mut prg: Vec<(String, Pos)> = vec![];
 
     if let Ok(lines) = read_lines(path) {
         for (i, line) in lines.enumerate() {
             if let Ok(ip) = line {
-                let words = ip.split(' ');
                 let mut col = 1;
-                for word in words {
-                    if word.contains('#') {
-                        break;
+                let mut word = String::from("");
+                let mut mode = Mode::Normal;
+                for char in ip.chars() {
+                    match (char, &mode) {
+                        ('#', Mode::Normal) => break,
+                        ('"', Mode::Normal) => { word.push(char); mode = Mode::String },
+                        ('"', Mode::String) => { word.push(char); mode = Mode::Normal },
+                        (' ', Mode::Normal) => {
+                            if !word.is_empty() {
+                                prg.push((word.clone(), (i + 1 , col, path.clone())));
+                                col += word.len() + 1;
+                                word.clear();
+                            }
+                        },
+                        (_, _)=> word.push(char)
                     }
-
-                    prg.push((String::from(word), (i + 1 , col, path.clone())));
-                    col += word.len() + 1
                 }
+                prg.push((word.clone(), (i + 1 , col, path.clone())));
             }
         }
     }
 
-    Ok(prg.iter()
-    .filter(|x| x.0 != "" )
-    .map(|x| x.clone())
-    .collect::<Vec<(String, Pos)>>())
+    Ok(prg)
 }
 
 fn cross_refeance(prg: &mut Vec<Lexeme>) -> Result<Vec<Lexeme>, &'static str> {
@@ -157,13 +169,7 @@ fn cross_refeance(prg: &mut Vec<Lexeme>) -> Result<Vec<Lexeme>, &'static str> {
 
     Ok(prg.clone())
 }
-fn strip_quotes(str:String) -> String {
-    let mut chars = str.chars();
-    chars.next();
-    chars.next_back();
-    chars.next_back();
-    chars.as_str().to_string()
-}
+
 // https://github.com/ttm/tokipona/blob/master/data/toki-pona_english.txt
 
 fn parse(prg: Result<Vec<(String, Pos)>, &'static str>, ctx: &mut Runtime) -> Result<Vec<Lexeme>, &'static str> {
@@ -208,17 +214,8 @@ fn parse(prg: Result<Vec<(String, Pos)>, &'static str>, ctx: &mut Runtime) -> Re
                         Instructions::Literal(Type::Float(x.parse::<f32>().unwrap()))
                     }
                     x if x.chars().nth(0).unwrap() == '"' => {
-                        let mut str = String::from("");
-                        let mut j = i;
-                        loop {
-                            str.push_str(unwraped_prg[j].0.as_str());
-                            str += " ";
-                            if !(unwraped_prg[j].0.chars().nth_back(0) != Some('"')) { break;  }
-                            j += 1;
-                        }
-                        i = j;
-
-                        ctx.str_heap.push(strip_quotes(str));
+                        let unescaped_x = unescape(x).unwrap();
+                        ctx.str_heap.push(unescaped_x);
                         let i = ctx.str_heap.len() - 1;
                         Instructions::Literal(Type::Str(i))
                     },
