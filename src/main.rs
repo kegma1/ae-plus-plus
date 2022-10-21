@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 use snailquote::unescape;
+use std::io::{stdin,stdout,Write};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum Type {
@@ -45,6 +46,7 @@ enum Instructions {
     Div,
 
     Print,
+    Input,
 
     Not,
     And,
@@ -188,6 +190,7 @@ fn parse(prg: Result<Vec<(String, Pos)>, &'static str>, ctx: &mut Runtime) -> Re
         parsed_prg.push((
                 match token.as_str() {
                     "toki" => Instructions::Print,
+                    "o!" => Instructions::Input,
                     "+" => Instructions::Add,
                     "-" => Instructions::Sub,
                     "*" => Instructions::Mult,
@@ -242,8 +245,31 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                 let print_value = ctx.stack.pop().unwrap();
 
                 if let Type::Str(x) = print_value {
-                    println!("{}", ctx.str_heap[x])
+                    print!("{}", ctx.str_heap[x])
                 } else { println!("{}", print_value) }
+            }
+            Instructions::Input => {
+                let print_value = ctx.stack.pop();
+
+                if let Some(Type::Str(x)) = print_value {
+                    print!("{}", ctx.str_heap[x])
+                }
+
+                let mut s = String::new();
+
+                let _=stdout().flush();
+                stdin().read_line(&mut s).expect("Did not enter a correct string");
+                if let Some('\n')=s.chars().next_back() {
+                    s.pop();
+                }
+                if let Some('\r')=s.chars().next_back() {
+                    s.pop();
+                }
+
+                let unescaped_x = unescape(&s).unwrap();
+                ctx.str_heap.push(unescaped_x);
+                let i = ctx.str_heap.len() - 1;
+                ctx.stack.push(Type::Str(i));
             }
             Instructions::Add => {
                 if ctx.stack.len() < 2 {
