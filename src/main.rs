@@ -26,7 +26,7 @@ impl std::fmt::Display for Type {
 
 
 type Pos = (usize, usize, String);
-type Lexeme = (Instructions, Pos);
+type Lexeme = (Instruction, Pos);
 type Ptr = usize;
 
 macro_rules! printerr {
@@ -37,7 +37,7 @@ macro_rules! printerr {
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
-enum Instructions {
+enum Instruction {
     Literal(Type),
 
     Add,
@@ -54,7 +54,9 @@ enum Instructions {
 
     Eq,
     Lt,
+    Le,
     Gt,
+    Ge,
 
     If(Option<Ptr>),
     Else(Option<Ptr>),
@@ -91,8 +93,8 @@ fn main() {
 
     let lexed = lex(path);
     let mut parsed = parse(lexed, &mut ctx).unwrap();
-//    println!("{:?}", cross_refeance(&mut parsed).unwrap());
-    let _ = execute(&mut ctx, cross_refeance(&mut parsed).unwrap());
+//    println!("{:?}", cross_reference(&mut parsed).unwrap());
+    let _ = execute(&mut ctx, cross_reference(&mut parsed).unwrap());
 }
 
 enum Mode {
@@ -132,37 +134,37 @@ fn lex(path: &String) -> Result<Vec<(String, Pos)>, &'static str> {
     Ok(prg)
 }
 
-fn cross_refeance(prg: &mut Vec<Lexeme>) -> Result<Vec<Lexeme>, &'static str> {
+fn cross_reference(prg: &mut Vec<Lexeme>) -> Result<Vec<Lexeme>, &'static str> {
     let mut stack: Vec<usize> = vec![];
     for i in 0..prg.len() {
         let token = prg[i].0.clone();
         match token {
-            Instructions::If(_) => stack.push(i),
-            Instructions::While => stack.push(i),
-            Instructions::Else(_) => {
+            Instruction::If(_) => stack.push(i),
+            Instruction::While => stack.push(i),
+            Instruction::Else(_) => {
                 let if_i = stack.pop().unwrap();
-                if let Instructions::If(_) = prg[if_i].0 {
-                    prg[if_i].0 = Instructions::If(Some(i + 1));
+                if let Instruction::If(_) = prg[if_i].0 {
+                    prg[if_i].0 = Instruction::If(Some(i + 1));
                     stack.push(i)
                 } else { printerr!("'ante-la' can only close 'la' blocks", prg[if_i].1); }
             }
-            Instructions::End(_) => {
+            Instruction::End(_) => {
                 let block_i = stack.pop().unwrap();
 
-                if prg[block_i].0 == Instructions::If(None) {
-                    prg[block_i].0 = Instructions::If(Some(i));
+                if prg[block_i].0 == Instruction::If(None) {
+                    prg[block_i].0 = Instruction::If(Some(i));
                 }
-                else if prg[block_i].0 == Instructions::Else(None) {
-                    prg[block_i].0 = Instructions::Else(Some(i));
+                else if prg[block_i].0 == Instruction::Else(None) {
+                    prg[block_i].0 = Instruction::Else(Some(i));
                 }
-                else if let Instructions::Do(Some(while_i)) = prg[block_i].0 {
-                    prg[i].0 = Instructions::End(Some(while_i));
-                    prg[block_i].0 = Instructions::Do(Some(i));
+                else if let Instruction::Do(Some(while_i)) = prg[block_i].0 {
+                    prg[i].0 = Instruction::End(Some(while_i));
+                    prg[block_i].0 = Instruction::Do(Some(i));
                 }
             }
-            Instructions::Do(_) => {
+            Instruction::Do(_) => {
                 let while_i = stack.pop().unwrap();
-                prg[i].0 = Instructions::Do(Some(while_i));
+                prg[i].0 = Instruction::Do(Some(while_i));
                 stack.push(i)
             }
             _ => (),
@@ -189,38 +191,40 @@ fn parse(prg: Result<Vec<(String, Pos)>, &'static str>, ctx: &mut Runtime) -> Re
 //        println!("{}", token);
         parsed_prg.push((
                 match token.as_str() {
-                    "toki" => Instructions::Print,
-                    "o!" => Instructions::Input,
-                    "+" => Instructions::Add,
-                    "-" => Instructions::Sub,
-                    "*" => Instructions::Mult,
-                    "/" => Instructions::Div,
-                    "ike" => Instructions::Not,
-                    "en" => Instructions::And,
-                    "anu" => Instructions::Or,
-                    "lon" => Instructions::Literal(Type::Bool(true)),
-                    "la" => Instructions::If(None),
-                    "ante-la" => Instructions::Else(None),
-                    "pini" => Instructions::End(None),
-                    "pali" => Instructions::Do(None),
-                    "tenpo" => Instructions::While,
-                    "sin" => Instructions::Dup,
-                    "pakala" => Instructions::Drop,
-                    "esun" => Instructions::Swap,
-                    "=" => Instructions::Eq,
-                    ">" => Instructions::Lt,
-                    "<" => Instructions::Gt,
+                    "toki" => Instruction::Print,
+                    "o!" => Instruction::Input,
+                    "+" => Instruction::Add,
+                    "-" => Instruction::Sub,
+                    "*" => Instruction::Mult,
+                    "/" => Instruction::Div,
+                    "ike" => Instruction::Not,
+                    "en" => Instruction::And,
+                    "anu" => Instruction::Or,
+                    "lon" => Instruction::Literal(Type::Bool(true)),
+                    "la" => Instruction::If(None),
+                    "ante-la" => Instruction::Else(None),
+                    "pini" => Instruction::End(None),
+                    "pali" => Instruction::Do(None),
+                    "tenpo" => Instruction::While,
+                    "sin" => Instruction::Dup,
+                    "pakala" => Instruction::Drop,
+                    "esun" => Instruction::Swap,
+                    "=" => Instruction::Eq,
+                    ">" => Instruction::Lt,
+                    ">=" => Instruction::Le,
+                    "<" => Instruction::Gt,
+                    "<=" => Instruction::Ge,
                     x if x.parse::<i32>().is_ok() => {
-                        Instructions::Literal(Type::Int(x.parse::<i32>().unwrap()))
+                        Instruction::Literal(Type::Int(x.parse::<i32>().unwrap()))
                     }
                     x if x.parse::<f32>().is_ok() => {
-                        Instructions::Literal(Type::Float(x.parse::<f32>().unwrap()))
+                        Instruction::Literal(Type::Float(x.parse::<f32>().unwrap()))
                     }
                     x if x.chars().nth(0).unwrap() == '"' => {
                         let unescaped_x = unescape(x).unwrap();
                         ctx.str_heap.push(unescaped_x);
                         let i = ctx.str_heap.len() - 1;
-                        Instructions::Literal(Type::Str(i))
+                        Instruction::Literal(Type::Str(i))
                     },
                     _ => continue,
                 },
@@ -237,9 +241,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
     while i < prg.len() {
         let (token, pos) = &prg[i];
         match token {
-            Instructions::Print => {
+            Instruction::Print => {
                 if ctx.stack.len() < 1 {
-                    printerr!("'toki' requiers 1 argument on the top of the stack", pos);
+                    printerr!("'toki' requires 1 argument on the top of the stack", pos);
                 }
 
                 let print_value = ctx.stack.pop().unwrap();
@@ -248,7 +252,7 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     print!("{}", ctx.str_heap[x])
                 } else { println!("{}", print_value) }
             }
-            Instructions::Input => {
+            Instruction::Input => {
                 let print_value = ctx.stack.pop();
 
                 if let Some(Type::Str(x)) = print_value {
@@ -271,9 +275,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                 let i = ctx.str_heap.len() - 1;
                 ctx.stack.push(Type::Str(i));
             }
-            Instructions::Add => {
+            Instruction::Add => {
                 if ctx.stack.len() < 2 {
-                    printerr!("'+' requiers 2 arguments on the top of the stack", pos);
+                    printerr!("'+' requires 2 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
@@ -311,9 +315,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("{:?} does not support add operator", a),
                 }
             }
-            Instructions::Sub => {
+            Instruction::Sub => {
                 if ctx.stack.len() < 2 {
-                    printerr!("'-' requiers 2 arguments on the top of the stack", pos);
+                    printerr!("'-' requires 2 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
@@ -339,9 +343,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("{:?} does not support sub operator", a),
                 }
             }
-            Instructions::Mult => {
+            Instruction::Mult => {
                 if ctx.stack.len() < 2 {
-                    printerr!("'*' requiers 2 arguments on the top of the stack", pos);
+                    printerr!("'*' requires 2 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
@@ -367,9 +371,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("{:?} does not support mult operator", a),
                 }
             }
-            Instructions::Div => {
+            Instruction::Div => {
                 if ctx.stack.len() < 2 {
-                    printerr!("'/' requiers 2 arguments on the top of the stack", pos);
+                    printerr!("'/' requires 2 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
@@ -397,9 +401,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("{:?} does not support div operator", a),
                 }
             }
-            Instructions::Not => {
+            Instruction::Not => {
                 if ctx.stack.len() < 1 {
-                    printerr!("'ike' requiers 1 arguments on the top of the stack", pos);
+                    printerr!("'ike' requires 1 arguments on the top of the stack", pos);
                 }
                 let b = ctx.stack.pop().unwrap();
                 match b {
@@ -412,9 +416,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("{:?} does not support not operator", b),
                 }
             }
-            Instructions::And => {
+            Instruction::And => {
                 if ctx.stack.len() < 2 {
-                    printerr!("'en' requiers 2 arguments on the top of the stack", pos);
+                    printerr!("'en' requires 2 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
@@ -439,9 +443,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("{:?} does not support and operator", a),
                 }
             }
-            Instructions::Or => {
+            Instruction::Or => {
                 if ctx.stack.len() < 2 {
-                    printerr!("'anu' requiers 2 arguments on the top of the stack", pos);
+                    printerr!("'anu' requires 2 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
@@ -466,9 +470,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("{:?} does not support or operator", a),
                 }
             }
-            Instructions::Eq => {
+            Instruction::Eq => {
                 if ctx.stack.len() < 2 {
-                    printerr!("'=' requiers 2 arguments on the top of the stack", pos);
+                    printerr!("'=' requires 2 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
@@ -501,9 +505,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("")
                 }
             }
-            Instructions::Lt => {
+            Instruction::Lt => {
                 if ctx.stack.len() < 2 {
-                    printerr!("'>' requiers 2 arguments on the top of the stack", pos);
+                    printerr!("'>' requires 2 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
@@ -536,9 +540,44 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("")
                 }
             }
-            Instructions::Gt => {
+            Instruction::Le => {
                 if ctx.stack.len() < 2 {
-                    printerr!("'<' requiers 2 arguments on the top of the stack", pos);
+                    printerr!("'>=' requires 2 arguments on the top of the stack", pos);
+                }
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+                match a {
+                    Type::Bool(x) => {
+                        let y = if let Type::Bool(y) = b {
+                            y
+                        } else {
+                            panic!("not a Bool")
+                        };
+                        ctx.stack.push(Type::Bool(x <= y));
+                    }
+                    Type::Int(x) => {
+                        let y = if let Type::Int(y) = b {
+                            y
+                        } else {
+                            panic!("not a Int")
+                        };
+                        ctx.stack.push(Type::Bool(x <= y));
+                    }
+                    Type::Float(x) => {
+                        let y = if let Type::Float(y) = b {
+                            y
+                        } else {
+                            panic!("not a Int")
+                        };
+                        ctx.stack.push(Type::Bool(x <= y));
+                    }
+                    _ => panic!("")
+                }
+            }
+            Instruction::Gt => {
+                if ctx.stack.len() < 2 {
+                    printerr!("'<' requires 2 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
@@ -571,25 +610,60 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("")
                 }
             }
-            Instructions::Dup => {
+            Instruction::Ge => {
+                if ctx.stack.len() < 2 {
+                    printerr!("'<=' requires 2 arguments on the top of the stack", pos);
+                }
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+                match a {
+                    Type::Bool(x) => {
+                        let y = if let Type::Bool(y) = b {
+                            y
+                        } else {
+                            panic!("not a Bool")
+                        };
+                        ctx.stack.push(Type::Bool(x >= y));
+                    }
+                    Type::Int(x) => {
+                        let y = if let Type::Int(y) = b {
+                            y
+                        } else {
+                            panic!("not a Int")
+                        };
+                        ctx.stack.push(Type::Bool(x >= y));
+                    }
+                    Type::Float(x) => {
+                        let y = if let Type::Float(y) = b {
+                            y
+                        } else {
+                            panic!("not a Float")
+                        };
+                        ctx.stack.push(Type::Bool(x >= y));
+                    }
+                    _ => panic!("")
+                }
+            }
+            Instruction::Dup => {
                 if ctx.stack.len() < 1 {
-                    printerr!("'sin' requiers 1 arguments on the top of the stack", pos);
+                    printerr!("'sin' requires 1 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
                 ctx.stack.push(b);
                 ctx.stack.push(b);
             }
-            Instructions::Drop => {
+            Instruction::Drop => {
                 if ctx.stack.len() < 1 {
-                    printerr!("'pakala' requiers 1 arguments on the top of the stack", pos);
+                    printerr!("'pakala' requires 1 arguments on the top of the stack", pos);
                 }
 
                 let _ = ctx.stack.pop().unwrap();
             }
-            Instructions::Swap => {
+            Instruction::Swap => {
                 if ctx.stack.len() < 2 {
-                    printerr!("'ensu' requiers 2 arguments on the top of the stack", pos);
+                    printerr!("'ensu' requires 2 arguments on the top of the stack", pos);
                 }
 
                 let b = ctx.stack.pop().unwrap();
@@ -597,9 +671,9 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                 ctx.stack.push(b);
                 ctx.stack.push(a);
             }
-            Instructions::If(x) => {
+            Instruction::If(x) => {
                 if ctx.stack.len() < 1 {
-                    printerr!("'la' requiers 1 arguments on the top of the stack", pos);
+                    printerr!("'la' requires 1 arguments on the top of the stack", pos);
                 }
                 let b = ctx.stack.pop().unwrap();
                 match b {
@@ -614,10 +688,10 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("{:?} does not support if operator", b),
                 }
             }
-            Instructions::While => (),
-            Instructions::Do(x) => {
+            Instruction::While => (),
+            Instruction::Do(x) => {
                 if ctx.stack.len() < 1 {
-                    printerr!("'pali' requiers 1 arguments on the top of the stack", pos);
+                    printerr!("'pali' requires 1 arguments on the top of the stack", pos);
                 }
                 let b = ctx.stack.pop().unwrap();
                 match b {
@@ -632,19 +706,19 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                     _ => panic!("{:?} does not support do operator", b),
                 }
             }
-            Instructions::Else(x) => {
+            Instruction::Else(x) => {
                 if let Some(ptr) = x {
                     i = *ptr;
                 }
             },
-            Instructions::End(x) => {
+            Instruction::End(x) => {
                 if let Some(ptr) = x {
                     i = *ptr;
                 }
             }
 
-            Instructions::Literal(literal) => ctx.stack.push(*literal),
-            // Instructions::Null => {continue;}
+            Instruction::Literal(literal) => ctx.stack.push(*literal),
+            // Instruction::Null => {continue;}
         }
         //println!("{:?}", token);
         i += 1;
