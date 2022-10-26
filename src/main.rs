@@ -177,6 +177,8 @@ fn cross_reference(prg: &mut Vec<Lexeme>) -> Result<Vec<Lexeme>, &'static str> {
 // https://github.com/ttm/tokipona/blob/master/data/toki-pona_english.txt
 
 fn parse(prg: Result<Vec<(String, Pos)>, &'static str>, ctx: &mut Runtime) -> Result<Vec<Lexeme>, &'static str> {
+    
+    // println!("{:?}",prg);
     if let Err(e) = prg {
         return Err(e);
     }
@@ -188,7 +190,7 @@ fn parse(prg: Result<Vec<(String, Pos)>, &'static str>, ctx: &mut Runtime) -> Re
     let prg_len = unwraped_prg.len();
     while i < prg_len {
         let (token, pos) = unwraped_prg[i].clone();
-//        println!("{}", token);
+        // println!("{}", i);
         parsed_prg.push((
                 match token.as_str() {
                     "toki" => Instruction::Print,
@@ -220,13 +222,13 @@ fn parse(prg: Result<Vec<(String, Pos)>, &'static str>, ctx: &mut Runtime) -> Re
                     x if x.parse::<f32>().is_ok() => {
                         Instruction::Literal(Type::Float(x.parse::<f32>().unwrap()))
                     }
-                    x if x.chars().nth(0).unwrap() == '"' => {
+                    x if x.chars().nth(0) == Some('"') => {
                         let unescaped_x = unescape(x).unwrap();
                         ctx.str_heap.push(unescaped_x);
                         let i = ctx.str_heap.len() - 1;
                         Instruction::Literal(Type::Str(i))
                     },
-                    _ => continue,
+                    _ => {i += 1; continue}
                 },
             pos,));
 
@@ -502,7 +504,16 @@ fn execute(ctx: &mut Runtime, prg: Vec<Lexeme>) {
                         };
                         ctx.stack.push(Type::Bool(x == y));
                     }
-                    _ => panic!("")
+                    Type::Str(str_x) => {
+                        let x = &ctx.str_heap[str_x];
+                        let y = if let Type::Str(y) = b {
+                            &ctx.str_heap[y]
+                        } else {
+                            panic!("not a Str")
+                        };
+                        ctx.stack.push(Type::Bool(x == y));
+                    }
+                    //_ => panic!("")
                 }
             }
             Instruction::Lt => {
