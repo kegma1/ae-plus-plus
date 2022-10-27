@@ -39,3 +39,7 @@ fn main() {
     //     println!("ERROR: {}, {}:{}:{}", e.0, e.1 .0, e.1 .1, e.1 .2)
     // }
 }
+
+fn run(path:&String) -> Result<u8, (&'static str, ops::Pos)> {
+    Ok(1)
+}
