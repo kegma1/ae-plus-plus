@@ -1,11 +1,12 @@
-use std::{any::Any, sync::Arc, fmt};
+use std::{fmt};
+
 
 #[derive(Clone)]
 pub struct Instruction {
     pub op: Operator,
     pub arg: Option<Ptr>,
     pub typ: Option<Type>,
-    pub val: Option<Arc<dyn Any>>,
+    pub val: Option<[u8; 4]>,
     pub pos: Pos,
 }
 
@@ -13,15 +14,15 @@ impl Instruction {
     pub fn new(
         op: Operator,
         typ: Option<Type>,
-        val: Option<Arc<dyn Any>>,
+        val: Option<[u8; 4]>,
         pos: Pos,
     ) -> Self {
         Instruction {
-            op: op,
+            op,
             arg: None,
-            typ: typ,
-            val: val,
-            pos: pos,
+            typ,
+            val,
+            pos,
         }
     }
 }
@@ -42,14 +43,21 @@ impl fmt::Display for Instruction {
     }
 }
 
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Type {
-    Int,
-    Float,
-    Bool,
-    Str, // index in str_heap
+    Int,// (i32)
+    Float, // (f32)
+    Bool, // (bool)
+    Str, // (Ptr)index in str_heap
+    //Type(str) "Int", "Float" ...
 }
 
+#[derive(Debug)]
+pub struct Value {
+    pub typ: Type,
+    pub val: [u8; 4]
+}
 pub type Pos = (usize, usize, String);
 pub type Ptr = usize;
 

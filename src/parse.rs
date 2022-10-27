@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{ops, Runtime};
 use snailquote::unescape;
 // https://github.com/ttm/tokipona/blob/master/data/toki-pona_english.txt
@@ -7,7 +5,7 @@ use snailquote::unescape;
 pub fn parse(
     prg: Vec<(String, ops::Pos)>,
     ctx: &mut Runtime,
-) -> Result<Vec<ops::Instruction>, &'static str> {
+) -> Result<Vec<ops::Instruction>, (&'static str, ops::Pos)> {
     // println!("{:?}",prg);
 
 
@@ -46,29 +44,29 @@ pub fn parse(
             "lon" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Type::Bool),
-                Some(Arc::new(true)),
+                Some([255; 4]),
                 pos,
             ),
             x if x.parse::<i32>().is_ok() => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Type::Int),
-                Some(Arc::new(x.parse::<i32>().unwrap())),
+                Some(x.parse::<i32>().unwrap().to_be_bytes()),
                 pos,
             ),
             x if x.parse::<f32>().is_ok() => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Type::Float),
-                Some(Arc::new(x.parse::<f32>().unwrap())),
+                Some(x.parse::<f32>().unwrap().to_be_bytes()),
                 pos,
             ),
             x if x.chars().nth(0) == Some('"') => {
                 let unescaped_x = unescape(x).unwrap();
                 ctx.str_heap.push(unescaped_x);
-                let i = ctx.str_heap.len() - 1;
+                let i = (ctx.str_heap.len() - 1) as u32;
                 ops::Instruction::new(
                     ops::Operator::Literal,
                     Some(ops::Type::Str),
-                    Some(Arc::new(i)),
+                    Some(i.to_be_bytes()),
                     pos,
                 )
             }

@@ -7,7 +7,7 @@ enum Mode {
     String,
 }
 
-pub fn lex(path: &String) -> Result<Vec<(String, Pos)>, &'static str> {
+pub fn lex(path: &String) -> Result<Vec<(String, Pos)>, (&'static str, Pos)> {
     let mut prg: Vec<(String, Pos)> = vec![];
 
     if let Ok(lines) = read_lines(path) {
