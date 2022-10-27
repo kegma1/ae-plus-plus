@@ -1,11 +1,8 @@
-use crate::ops;
+use crate::{ops, Runtime};
 use snailquote::unescape;
 use std::io::{stdin, stdout, Write};
 
-pub fn execute(
-    ctx: &mut ops::Runtime,
-    prg: Vec<ops::Lexeme>,
-) -> Result<u8, (&'static str, ops::Pos)> {
+pub fn execute(ctx: &mut Runtime, prg: Vec<ops::Instruction>) -> Result<u8, (&'static str, ops::Pos)> {
     let mut i = 0;
     while i < prg.len() {
         let (token, pos) = &prg[i];

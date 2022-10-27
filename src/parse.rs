@@ -1,68 +1,82 @@
-use crate::ops;
+use std::sync::Arc;
+
+use crate::{ops, Runtime};
 use snailquote::unescape;
 // https://github.com/ttm/tokipona/blob/master/data/toki-pona_english.txt
 
 pub fn parse(
-    prg: Result<Vec<(String, ops::Pos)>, &'static str>,
-    ctx: &mut ops::Runtime,
-) -> Result<Vec<ops::Lexeme>, &'static str> {
+    prg: Vec<(String, ops::Pos)>,
+    ctx: &mut Runtime,
+) -> Result<Vec<ops::Instruction>, &'static str> {
     // println!("{:?}",prg);
-    if let Err(e) = prg {
-        return Err(e);
-    }
 
-    let mut parsed_prg: Vec<ops::Lexeme> = vec![];
 
-    let unwraped_prg = prg.unwrap();
+    let mut parsed_prg: Vec<ops::Instruction> = vec![];
+
+    let unwraped_prg = prg;
     let mut i = 0;
     let prg_len = unwraped_prg.len();
     while i < prg_len {
         let (token, pos) = unwraped_prg[i].clone();
         // println!("{}", i);
-        parsed_prg.push((
-            match token.as_str() {
-                "toki" => ops::Operator::Print,
-                "o!" => ops::Operator::Input,
-                "+" => ops::Operator::Add,
-                "-" => ops::Operator::Sub,
-                "*" => ops::Operator::Mult,
-                "/" => ops::Operator::Div,
-                "ike" => ops::Operator::Not,
-                "en" => ops::Operator::And,
-                "anu" => ops::Operator::Or,
-                "lon" => ops::Operator::Literal(ops::Type::Bool(true)),
-                "la" => ops::Operator::If(None),
-                "ante-la" => ops::Operator::Else(None),
-                "pini" => ops::Operator::End(None),
-                "pali" => ops::Operator::Do(None),
-                "tenpo" => ops::Operator::While,
-                "sin" => ops::Operator::Dup,
-                "pakala" => ops::Operator::Drop,
-                "esun" => ops::Operator::Swap,
-                "=" => ops::Operator::Eq,
-                ">" => ops::Operator::Lt,
-                ">=" => ops::Operator::Le,
-                "<" => ops::Operator::Gt,
-                "<=" => ops::Operator::Ge,
-                x if x.parse::<i32>().is_ok() => {
-                    ops::Operator::Literal(ops::Type::Int(x.parse::<i32>().unwrap()))
-                }
-                x if x.parse::<f32>().is_ok() => {
-                    ops::Operator::Literal(ops::Type::Float(x.parse::<f32>().unwrap()))
-                }
-                x if x.chars().nth(0) == Some('"') => {
-                    let unescaped_x = unescape(x).unwrap();
-                    ctx.str_heap.push(unescaped_x);
-                    let i = ctx.str_heap.len() - 1;
-                    ops::Operator::Literal(ops::Type::Str(i))
-                }
-                _ => {
-                    i += 1;
-                    continue;
-                }
-            },
-            pos,
-        ));
+        parsed_prg.push(match token.as_str() {
+            "toki" => ops::Instruction::new(ops::Operator::Print, None, None, pos),
+            "o!" => ops::Instruction::new(ops::Operator::Input, None, None, pos),
+            "+" => ops::Instruction::new(ops::Operator::Add, None, None, pos),
+            "-" => ops::Instruction::new(ops::Operator::Sub, None, None, pos),
+            "*" => ops::Instruction::new(ops::Operator::Mult, None, None, pos),
+            "/" => ops::Instruction::new(ops::Operator::Div, None, None, pos),
+            "ike" => ops::Instruction::new(ops::Operator::Not, None, None, pos),
+            "en" => ops::Instruction::new(ops::Operator::And, None, None, pos),
+            "anu" => ops::Instruction::new(ops::Operator::Or, None, None, pos),
+            "la" => ops::Instruction::new(ops::Operator::If, None, None, pos),
+            "ante-la" => ops::Instruction::new(ops::Operator::Else, None, None, pos),
+            "pini" => ops::Instruction::new(ops::Operator::End, None, None, pos),
+            "pali" => ops::Instruction::new(ops::Operator::Do, None, None, pos),
+            "tenpo" => ops::Instruction::new(ops::Operator::While, None, None, pos),
+            "sin" => ops::Instruction::new(ops::Operator::Dup, None, None, pos),
+            "pakala" => ops::Instruction::new(ops::Operator::Drop, None, None, pos),
+            "esun" => ops::Instruction::new(ops::Operator::Swap, None, None, pos),
+            "=" => ops::Instruction::new(ops::Operator::Eq, None, None, pos),
+            ">" => ops::Instruction::new(ops::Operator::Lt, None, None, pos),
+            ">=" => ops::Instruction::new(ops::Operator::Le, None, None, pos),
+            "<" => ops::Instruction::new(ops::Operator::Gt, None, None, pos),
+            "<=" => ops::Instruction::new(ops::Operator::Ge, None, None, pos),
+
+            "lon" => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Type::Bool),
+                Some(Arc::new(true)),
+                pos,
+            ),
+            x if x.parse::<i32>().is_ok() => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Type::Int),
+                Some(Arc::new(x.parse::<i32>().unwrap())),
+                pos,
+            ),
+            x if x.parse::<f32>().is_ok() => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Type::Float),
+                Some(Arc::new(x.parse::<f32>().unwrap())),
+                pos,
+            ),
+            x if x.chars().nth(0) == Some('"') => {
+                let unescaped_x = unescape(x).unwrap();
+                ctx.str_heap.push(unescaped_x);
+                let i = ctx.str_heap.len() - 1;
+                ops::Instruction::new(
+                    ops::Operator::Literal,
+                    Some(ops::Type::Str),
+                    Some(Arc::new(i)),
+                    pos,
+                )
+            }
+            _ => {
+                i += 1;
+                continue;
+            }
+        });
 
         i += 1
     }
