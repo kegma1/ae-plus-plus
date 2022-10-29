@@ -189,6 +189,20 @@ pub fn execute(ctx: &mut Runtime, prg: & Vec<ops::Instruction>) -> Result<u8, (&
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.stack.push(ops::Value::Bool(x == y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => ctx.stack.push(ops::Value::Bool(x == y)),
                     (ops::Value::Str(x), ops::Value::Str(y)) => ctx.stack.push(ops::Value::Bool(ctx.str_heap[x] == ctx.str_heap[y])),
+                    (_, ops::Value::TypeLiteral(ops::TypeLiteral::Int)) => {
+                        if let ops::Value::Int(_) = a {
+                            ctx.stack.push(ops::Value::Bool(true))
+                        } else {
+                            ctx.stack.push(ops::Value::Bool(false))
+                        }
+                    },
+                    (_, ops::Value::TypeLiteral(ops::TypeLiteral::Str)) => {
+                        if let ops::Value::Str(_) = a {
+                            ctx.stack.push(ops::Value::Bool(true))
+                        } else {
+                            ctx.stack.push(ops::Value::Bool(false))
+                        }
+                    },
                     (_, _) => {
                         let err_s: String = format!("'{} = {}' is not supported", a, b).to_owned();
                         return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));

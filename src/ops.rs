@@ -32,7 +32,7 @@ impl fmt::Display for Instruction {
         if let Some(x) = self.val {
             write!(f, "{:?}, ", x).unwrap();
         }
-        write!(f, "{:?}", self.pos)
+        Ok(())
     }
 }
 
