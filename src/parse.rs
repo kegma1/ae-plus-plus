@@ -43,30 +43,26 @@ pub fn parse(
 
             "lon" => ops::Instruction::new(
                 ops::Operator::Literal,
-                Some(ops::Type::Bool),
-                Some(Arc::new(true)),
+                Some(ops::Value::Bool(true)),
                 pos,
             ),
             x if x.parse::<i32>().is_ok() => ops::Instruction::new(
                 ops::Operator::Literal,
-                Some(ops::Type::Int),
-                Some(x.parse::<i32>().unwrap().to_be_bytes()),
+                Some(ops::Value::Int(x.parse::<i32>().unwrap())),
                 pos,
             ),
             x if x.parse::<f32>().is_ok() => ops::Instruction::new(
                 ops::Operator::Literal,
-                Some(ops::Type::Float),
-                Some(x.parse::<f32>().unwrap().to_be_bytes()),
+                Some(ops::Value::Float(x.parse::<f32>().unwrap())),
                 pos,
             ),
             x if x.chars().nth(0) == Some('"') => {
                 let unescaped_x = unescape(x).unwrap();
                 ctx.str_heap.push(unescaped_x);
-                let i = (ctx.str_heap.len() - 1) as u32;
+                let i = (ctx.str_heap.len() - 1) as usize;
                 ops::Instruction::new(
                     ops::Operator::Literal,
-                    Some(ops::Type::Str),
-                    Some(i.to_be_bytes()),
+                    Some(ops::Value::Str(i)),
                     pos,
                 )
             }

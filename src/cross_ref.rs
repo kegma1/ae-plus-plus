@@ -12,7 +12,7 @@ pub fn cross_reference(
             ops::Operator::Else => {
                 let if_i = stack.pop().unwrap();
                 if prg[if_i].op == ops::Operator::If {
-                    prg[if_i].arg = Some(i + 1);
+                    prg[if_i].arg = Some(i);
                     stack.push(i)
                 } else {
                     return Err(("'ante-la' can only close 'la' blocks", prg[if_i].pos.clone()));
