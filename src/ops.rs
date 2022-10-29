@@ -1,12 +1,10 @@
-use std::{fmt};
-
+use std::fmt;
 
 #[derive(Clone)]
 pub struct Instruction {
     pub op: Operator,
     pub arg: Option<Ptr>,
     pub typ: Option<Type>,
-    pub val: Option<[u8; 4]>,
     pub pos: Pos,
 }
 
@@ -14,14 +12,12 @@ impl Instruction {
     pub fn new(
         op: Operator,
         typ: Option<Type>,
-        val: Option<[u8; 4]>,
         pos: Pos,
     ) -> Self {
         Instruction {
             op,
             arg: None,
             typ,
-            val,
             pos,
         }
     }
@@ -36,9 +32,6 @@ impl fmt::Display for Instruction {
         if let Some(x) = self.typ {
             write!(f, "{:?}, ", x).unwrap();
         }
-        if let Some(x) = &self.val {
-            write!(f, "{:?}, ", x).unwrap();
-        }
         write!(f, "{:?}", self.pos)
     }
 }
@@ -46,11 +39,19 @@ impl fmt::Display for Instruction {
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Type {
-    Int,// (i32)
-    Float, // (f32)
-    Bool, // (bool)
-    Str, // (Ptr)index in str_heap
-    //Type(str) "Int", "Float" ...
+    Int(i32),
+    Float(f32),
+    Bool(bool),
+    Str(Ptr), // index in str_heap
+    TypeLiteral(TypeLiteral),
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum TypeLiteral {
+    Int,
+    Float,
+    Bool,
+    Str, 
 }
 
 #[derive(Debug)]
