@@ -2,6 +2,7 @@
 programing language in toki pona
 
 # todo
+- [x] Reworked runtime and execution
 - [ ] Add string manipulation
 - [ ] Add type casting
 - [ ] Add rest of stack operators
