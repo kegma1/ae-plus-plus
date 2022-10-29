@@ -333,6 +333,44 @@ pub fn execute(ctx: &mut Runtime, prg: & Vec<ops::Instruction>) -> Result<u8, (&
                 ctx.stack.push(b);
                 ctx.stack.push(a);
             },
+            ops::Operator::Dup2 => {
+                if ctx.stack.len() < 2 {
+                    return Err(("'sin-tu' operator requiers atleast 2 arguments", token.pos.clone()));
+                }
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+
+                ctx.stack.push(a);
+                ctx.stack.push(b);
+                ctx.stack.push(a);
+                ctx.stack.push(b);
+            },
+            ops::Operator::Over => {
+                if ctx.stack.len() < 2 {
+                    return Err(("'sewi' operator requiers atleast 2 arguments", token.pos.clone()));
+                }
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+
+                ctx.stack.push(a);
+                ctx.stack.push(b);
+                ctx.stack.push(a);
+            },
+            ops::Operator::Rot => {
+                if ctx.stack.len() < 3 {
+                    return Err(("'sike' operator requiers atleast 2 arguments", token.pos.clone()));
+                }
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+                let c = ctx.stack.pop().unwrap();
+
+                ctx.stack.push(b);
+                ctx.stack.push(c);
+                ctx.stack.push(a);
+            },
         }
         // println!("{:?}", token.op);
         i += 1;

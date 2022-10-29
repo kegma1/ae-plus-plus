@@ -5,6 +5,6 @@ programing language in toki pona
 - [x] Reworked runtime and execution
 - [ ] Add string manipulation
 - [ ] Add type casting
-- [ ] Add rest of stack operators
+- [x] Add rest of stack operators
 - [ ] Add memory read and write
 - [ ] Add functions
