@@ -32,7 +32,7 @@ impl fmt::Display for Instruction {
         if let Some(x) = self.val {
             write!(f, "{:?}, ", x).unwrap();
         }
-        write!(f, "{:?}", self.pos)
+        Ok(())
     }
 }
 
@@ -79,6 +79,8 @@ pub enum Operator {
     Mult,
     Div,
 
+    Cast,
+
     Print,
     Input,
 
@@ -101,5 +103,7 @@ pub enum Operator {
     Dup,
     Drop,
     Swap,
+    Over,
+    Rot,
     // Null
 }

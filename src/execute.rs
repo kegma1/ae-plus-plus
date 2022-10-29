@@ -93,12 +93,12 @@ pub fn execute(ctx: &mut Runtime, prg: & Vec<ops::Instruction>) -> Result<u8, (&
                 }
 
                 let print_val = ctx.stack.pop().unwrap();
-
+                let _ = stdout().flush();
                 match print_val  {
-                    ops::Value::Int(x) => println!("{}", x),
-                    ops::Value::Float(x) => println!("{}", x),
-                    ops::Value::Bool(x) => println!("{}", x),
-                    ops::Value::Str(x) => println!("{}", ctx.str_heap[x]),
+                    ops::Value::Int(x) => print!("{}\n", x),
+                    ops::Value::Float(x) => print!("{}\n", x),
+                    ops::Value::Bool(x) => print!("{}\n", x),
+                    ops::Value::Str(x) => print!("{}\n", ctx.str_heap[x]),
                     ops::Value::TypeLiteral(_) => todo!("print for TypeLiter is not implemented"),
                 }
             },
@@ -115,6 +115,12 @@ pub fn execute(ctx: &mut Runtime, prg: & Vec<ops::Instruction>) -> Result<u8, (&
                 stdin()
                     .read_line(&mut s)
                     .expect("Did not enter a correct string");
+                if let Some('\n') = s.chars().next_back() {
+                    s.pop();
+                }
+                if let Some('\r') = s.chars().next_back() {
+                    s.pop();
+                }
 
                 let unescaped_x = unescape(&s).unwrap();
                 ctx.str_heap.push(unescaped_x);
@@ -183,6 +189,20 @@ pub fn execute(ctx: &mut Runtime, prg: & Vec<ops::Instruction>) -> Result<u8, (&
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.stack.push(ops::Value::Bool(x == y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => ctx.stack.push(ops::Value::Bool(x == y)),
                     (ops::Value::Str(x), ops::Value::Str(y)) => ctx.stack.push(ops::Value::Bool(ctx.str_heap[x] == ctx.str_heap[y])),
+                    (_, ops::Value::TypeLiteral(ops::TypeLiteral::Int)) => {
+                        if let ops::Value::Int(_) = a {
+                            ctx.stack.push(ops::Value::Bool(true))
+                        } else {
+                            ctx.stack.push(ops::Value::Bool(false))
+                        }
+                    },
+                    (_, ops::Value::TypeLiteral(ops::TypeLiteral::Str)) => {
+                        if let ops::Value::Str(_) = a {
+                            ctx.stack.push(ops::Value::Bool(true))
+                        } else {
+                            ctx.stack.push(ops::Value::Bool(false))
+                        }
+                    },
                     (_, _) => {
                         let err_s: String = format!("'{} = {}' is not supported", a, b).to_owned();
                         return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
@@ -332,6 +352,103 @@ pub fn execute(ctx: &mut Runtime, prg: & Vec<ops::Instruction>) -> Result<u8, (&
 
                 ctx.stack.push(b);
                 ctx.stack.push(a);
+            },
+            ops::Operator::Over => {
+                if ctx.stack.len() < 2 {
+                    return Err(("'sewi' operator requiers atleast 2 arguments", token.pos.clone()));
+                }
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+
+                ctx.stack.push(a);
+                ctx.stack.push(b);
+                ctx.stack.push(a);
+            },
+            ops::Operator::Rot => {
+                if ctx.stack.len() < 3 {
+                    return Err(("'sike' operator requiers atleast 2 arguments", token.pos.clone()));
+                }
+
+                let b = ctx.stack.pop().unwrap();
+                let a = ctx.stack.pop().unwrap();
+                let c = ctx.stack.pop().unwrap();
+
+                ctx.stack.push(b);
+                ctx.stack.push(c);
+                ctx.stack.push(a);
+            },
+            ops::Operator::Cast => {
+                if ctx.stack.len() < 2 {
+                    return Err(("'...' operator requiers atleast 2 arguments", token.pos.clone()));
+                }
+
+                let typ = ctx.stack.pop().unwrap();
+                let b = ctx.stack.pop().unwrap();
+
+                match (typ, b) {
+                    (ops::Value::TypeLiteral(ops::TypeLiteral::Int), _) => {
+                        match b {
+                            ops::Value::Float(x) => ctx.stack.push(ops::Value::Int(x as i32)),
+                            ops::Value::Bool(x) => if x { ctx.stack.push(ops::Value::Int(1i32))} else {ctx.stack.push(ops::Value::Int(0i32))},
+                            ops::Value::Str(x) => {
+                                if let Ok(new_x) = ctx.str_heap[x].parse::<i32>() {
+                                    ctx.stack.push(ops::Value::Int(new_x));
+                                } else {
+                                    return Err(("Failed to cast to Int", token.pos.clone()));
+                                }
+                            }
+                            _ => {
+                                let err_s: String = format!("Can't cast {} to {}", b, typ).to_owned();
+                                return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                            }
+                        }
+                    },
+                    (ops::Value::TypeLiteral(ops::TypeLiteral::Float), _) => {
+                        match b {
+                            ops::Value::Int(x) => ctx.stack.push(ops::Value::Float(x as f32)),
+                            ops::Value::Bool(x) => if x { ctx.stack.push(ops::Value::Float(1.))} else {ctx.stack.push(ops::Value::Float(0.))},
+                            ops::Value::Str(x) => {
+                                if let Ok(new_x) = ctx.str_heap[x].parse::<f32>() {
+                                    ctx.stack.push(ops::Value::Float(new_x));
+                                } else {
+                                    return Err(("Failed to cast to Float", token.pos.clone()));
+                                }
+                            }
+                            _ => {
+                                let err_s: String = format!("Can't cast {} to {}", b, typ).to_owned();
+                                return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                            }
+                        }
+                    },
+                    (ops::Value::TypeLiteral(ops::TypeLiteral::Str), _) => {
+                        match b {
+                            ops::Value::Int(x) => {
+                                let new_x = x.to_string();
+                                ctx.str_heap.push(new_x);
+                                ctx.stack.push(ops::Value::Str(ctx.str_heap.len() - 1))
+                            },
+                            ops::Value::Float(x) => {
+                                let new_x = x.to_string();
+                                ctx.str_heap.push(new_x);
+                                ctx.stack.push(ops::Value::Str(ctx.str_heap.len() - 1))
+                            },
+                            ops::Value::Bool(x) => {
+                                let new_x = x.to_string();
+                                ctx.str_heap.push(new_x);
+                                ctx.stack.push(ops::Value::Str(ctx.str_heap.len() - 1))
+                            },
+                            _ => {
+                                let err_s: String = format!("Can't cast {} to {}", b, typ).to_owned();
+                                return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                            }
+                        }
+                    },
+                    (_, _) => {
+                        let err_s: String = format!("Can't cast {} to {}. Second argument must be a TypeLitr", b, typ).to_owned();
+                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                    }
+                }
             },
         }
         // println!("{:?}", token.op);
