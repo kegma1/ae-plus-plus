@@ -33,7 +33,6 @@ pub fn parse(
             "pali" => ops::Instruction::new(ops::Operator::Do, None, pos),
             "tenpo" => ops::Instruction::new(ops::Operator::While, None, pos),
             "sin" => ops::Instruction::new(ops::Operator::Dup, None, pos),
-            "sin-tu" => ops::Instruction::new(ops::Operator::Dup2, None, pos),
             "sike" => ops::Instruction::new(ops::Operator::Rot, None, pos),
             "sewi" => ops::Instruction::new(ops::Operator::Over, None, pos),
             "pakala" => ops::Instruction::new(ops::Operator::Drop, None, pos),

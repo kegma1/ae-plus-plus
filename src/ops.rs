@@ -99,7 +99,6 @@ pub enum Operator {
     While,
 
     Dup,
-    Dup2,
     Drop,
     Swap,
     Over,
