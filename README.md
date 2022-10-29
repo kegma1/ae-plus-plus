@@ -8,3 +8,5 @@ programing language in toki pona
 - [x] Add rest of stack operators
 - [ ] Add memory read and write
 - [ ] Add functions
+- [ ] Add import
+- [ ] Make better error system
