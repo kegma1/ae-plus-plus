@@ -37,12 +37,28 @@ pub fn parse(
             "sewi" => ops::Instruction::new(ops::Operator::Over, None, pos),
             "pakala" => ops::Instruction::new(ops::Operator::Drop, None, pos),
             "esun" => ops::Instruction::new(ops::Operator::Swap, None, pos),
+            "kama" => ops::Instruction::new(ops::Operator::Cast, None, pos),
             "=" => ops::Instruction::new(ops::Operator::Eq, None, pos),
             ">" => ops::Instruction::new(ops::Operator::Gt, None, pos),
             ">=" => ops::Instruction::new(ops::Operator::Ge, None, pos),
             "<" => ops::Instruction::new(ops::Operator::Lt, None, pos),
             "<=" => ops::Instruction::new(ops::Operator::Le, None, pos),
 
+            "nanpa" => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Value::TypeLiteral(ops::TypeLiteral::Int)),
+                pos,
+            ),
+            "nanpa-waso" => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Value::TypeLiteral(ops::TypeLiteral::Float)),
+                pos,
+            ),
+            "sitelen" => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Value::TypeLiteral(ops::TypeLiteral::Str)),
+                pos,
+            ),
             "lon" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::Bool(true)),

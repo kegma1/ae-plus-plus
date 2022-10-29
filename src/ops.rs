@@ -79,6 +79,8 @@ pub enum Operator {
     Mult,
     Div,
 
+    Cast,
+
     Print,
     Input,
 
