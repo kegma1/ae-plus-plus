@@ -1,15 +1,11 @@
 1 tenpo sin 100 <= pali
     sin sin 3 / pakala 0 = esun 5 / pakala 0 = en la
         "Fizzbuzz"
-    ante-la 
-        sin 3 / pakala 0 = la
-            "Fizz"
-        ante-la 
-            sin 5 / pakala 0 = la
-                "Buzz"
-            pini
-        pini 
-    pini
+    ante-la sin 3 / pakala 0 = la
+        "Fizz"
+    ante-la sin 5 / pakala 0 = la
+        Buzz"
+    pini pini pini
 
     sin sitelen = la
         toki
