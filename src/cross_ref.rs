@@ -38,6 +38,9 @@ pub fn cross_reference(
             _ => (),
         }
     }
+    if stack.len() > 0 {
+        return Err(("Unclosed block", prg[stack.pop().unwrap()].pos.clone()));
+    }
 
     Ok(prg.clone())
 }
