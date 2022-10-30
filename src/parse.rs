@@ -84,9 +84,13 @@ pub fn parse(
                     pos,
                 )
             }
-            _ => {
+            "" => {
                 i += 1;
                 continue;
+            }
+            _ => {
+                let err_s: String = format!("Unknown word '{}'", token).to_owned();
+                return Err((Box::leak(err_s.into_boxed_str()), pos.clone()));
             }
         });
 

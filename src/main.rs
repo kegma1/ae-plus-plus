@@ -38,16 +38,16 @@ fn main() {
             if x == "-d" {
                 let mut ctx = Runtime::new();
                 let res = debug_run(path, &mut ctx);
-                if let Err(e) = res {
-                    println!("ERROR: {}, {}:{}:{}", e.0, e.1 .0, e.1 .1, e.1 .2);
+                if let Err((e, pos)) = res {
+                    println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
                 }
                 println!("\nstack: {:?}\nStrings: {:?}", ctx.stack, ctx.str_heap)
             }
         },
         None => {
             let res = run(path);
-            if let Err(e) = res {
-                println!("ERROR: {}, {}:{}:{}", e.0, e.1 .0, e.1 .1, e.1 .2)
+            if let Err((e, pos)) = res {
+                println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
             }
         }
     }    
