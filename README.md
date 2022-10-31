@@ -1,5 +1,5 @@
-# nanpa_pona
-programing language in toki pona
+# æ++
+programing language in norwegian
 
 # todo
 - [x] Reworked runtime and execution
