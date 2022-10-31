@@ -49,8 +49,8 @@ pub enum Value {
 impl fmt::Display for Value {
 fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     match self {
-        Value::Int(_) => write!(f, "Int"),
-        Value::Float(_) => write!(f, "Float"),
+        Value::Int(_) => write!(f, "Heltall"),
+        Value::Float(_) => write!(f, "Flyttall"),
         Value::Bool(_) => write!(f, "Bool"),
         Value::Str(_) => write!(f, "Str"),
         Value::TypeLiteral(_) => write!(f, "TypeLitr"),
