@@ -74,6 +74,6 @@ I Æ++ vill nesten alt av operasjoner fungere på top elementene på stabelen. U
 |dup|`a -> a a`|
 |rot|`a b c -> b c a`|
 |slipp|`a b -> a`|
-|bytt|`a b -> b a`|
+|snu|`a b -> b a`|
 |over|`a b -> a b a`|
 #

@@ -5,10 +5,12 @@ mod execute;
 mod lex;
 mod ops;
 mod parse;
-
+const MEM_SIZE: usize = 360_000;
 #[derive(Debug)]
 pub struct Runtime {
-    pub stack: Vec<ops::Value>,
+    stack: Vec<ops::Value>,
+    mem: [u8; MEM_SIZE],
+    len: usize,
     pub str_heap: Vec<String>,
 }
 
@@ -16,8 +18,35 @@ impl Runtime{
     pub fn new() -> Self {
         Runtime {
             stack: vec![],
+            mem: [0u8; MEM_SIZE],
+            len: 0,
             str_heap: vec![],
         }
+    }
+
+    pub fn push(&mut self, x: ops::Value) {
+        self.stack.push(x);
+    }
+
+    pub fn pop(&mut self) -> Option<ops::Value> {
+        self.stack.pop()
+    }
+
+    pub fn read(&mut self, addr: ops::Ptr, len: usize) -> Vec<u8> {
+        let mut output = vec![];
+        for i in addr..(addr + (len - 1)) {
+            output.push(self.mem[i])
+        }
+        output
+    }
+
+    pub fn write(&mut self, val: Vec<u8>) -> (ops::Ptr, usize) {
+        let addr = self.len;
+        for x in &val {
+            self.mem[self.len] = *x;
+            self.len += 1
+        }
+        (addr, val.len())
     }
 }
 

@@ -36,13 +36,15 @@ pub fn parse(
             "rot" => ops::Instruction::new(ops::Operator::Rot, None, pos),
             "over" => ops::Instruction::new(ops::Operator::Over, None, pos),
             "slipp" => ops::Instruction::new(ops::Operator::Drop, None, pos),
-            "bytt" => ops::Instruction::new(ops::Operator::Swap, None, pos),
+            "snu" => ops::Instruction::new(ops::Operator::Swap, None, pos),
             "omgjør" => ops::Instruction::new(ops::Operator::Cast, None, pos),
             "=" => ops::Instruction::new(ops::Operator::Eq, None, pos),
             ">" => ops::Instruction::new(ops::Operator::Gt, None, pos),
             ">=" => ops::Instruction::new(ops::Operator::Ge, None, pos),
             "<" => ops::Instruction::new(ops::Operator::Lt, None, pos),
             "<=" => ops::Instruction::new(ops::Operator::Le, None, pos),
+            "," => ops::Instruction::new(ops::Operator::Read, None, pos),
+            "." => ops::Instruction::new(ops::Operator::Write, None, pos),
 
             "heltall" => ops::Instruction::new(
                 ops::Operator::Literal,

@@ -43,6 +43,7 @@ pub enum Value {
     Float(f32),
     Bool(bool),
     Str(Ptr), // index in str_heap
+    Ptr(Ptr),
     TypeLiteral(TypeLiteral),
 }
 
@@ -54,6 +55,7 @@ fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         Value::Bool(_) => write!(f, "Bool"),
         Value::Str(_) => write!(f, "Str"),
         Value::TypeLiteral(_) => write!(f, "TypeLitr"),
+        Value::Ptr(_) => write!(f, "Peker"),
     }
 }
 }
@@ -83,6 +85,9 @@ pub enum Operator {
 
     Print,
     Input,
+
+    Read,
+    Write,
 
     Not,
     And,
