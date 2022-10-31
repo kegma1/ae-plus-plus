@@ -15,7 +15,7 @@ pub fn cross_reference(
                     prg[if_i].arg = Some(i);
                     stack.push(i)
                 } else {
-                    return Err(("'ante-la' can only close 'la' blocks", prg[if_i].pos.clone()));
+                    return Err(("'ellers' kan bare stenge 'hvis' blokker", prg[if_i].pos.clone()));
                 }
             }
             ops::Operator::End => {
@@ -39,7 +39,7 @@ pub fn cross_reference(
         }
     }
     if stack.len() > 0 {
-        return Err(("Unclosed block", prg[stack.pop().unwrap()].pos.clone()));
+        return Err(("ikke stengt blokk", prg[stack.pop().unwrap()].pos.clone()));
     }
 
     Ok(prg.clone())

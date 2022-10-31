@@ -1,0 +1,4 @@
+0 mens dup 15 <= gjør
+    dup si
+    1 +
+slutt

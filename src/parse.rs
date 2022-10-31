@@ -18,50 +18,55 @@ pub fn parse(
         let (token, pos) = unwraped_prg[i].clone();
         // println!("{}", i);
         parsed_prg.push(match token.as_str() {
-            "toki" => ops::Instruction::new(ops::Operator::Print, None, pos),
-            "o!" => ops::Instruction::new(ops::Operator::Input, None, pos),
+            "si" => ops::Instruction::new(ops::Operator::Print, None, pos),
+            "spør" => ops::Instruction::new(ops::Operator::Input, None, pos),
             "+" => ops::Instruction::new(ops::Operator::Add, None, pos),
             "-" => ops::Instruction::new(ops::Operator::Sub, None, pos),
             "*" => ops::Instruction::new(ops::Operator::Mult, None, pos),
             "/" => ops::Instruction::new(ops::Operator::Div, None, pos),
-            "ike" => ops::Instruction::new(ops::Operator::Not, None, pos),
-            "en" => ops::Instruction::new(ops::Operator::And, None, pos),
-            "anu" => ops::Instruction::new(ops::Operator::Or, None, pos),
-            "la" => ops::Instruction::new(ops::Operator::If, None, pos),
-            "ante-la" => ops::Instruction::new(ops::Operator::Else, None, pos),
-            "pini" => ops::Instruction::new(ops::Operator::End, None, pos),
-            "pali" => ops::Instruction::new(ops::Operator::Do, None, pos),
-            "tenpo" => ops::Instruction::new(ops::Operator::While, None, pos),
-            "sin" => ops::Instruction::new(ops::Operator::Dup, None, pos),
-            "sike" => ops::Instruction::new(ops::Operator::Rot, None, pos),
-            "sewi" => ops::Instruction::new(ops::Operator::Over, None, pos),
-            "pakala" => ops::Instruction::new(ops::Operator::Drop, None, pos),
-            "esun" => ops::Instruction::new(ops::Operator::Swap, None, pos),
-            "kama" => ops::Instruction::new(ops::Operator::Cast, None, pos),
+            "ikke" => ops::Instruction::new(ops::Operator::Not, None, pos),
+            "og" => ops::Instruction::new(ops::Operator::And, None, pos),
+            "eller" => ops::Instruction::new(ops::Operator::Or, None, pos),
+            "hvis" => ops::Instruction::new(ops::Operator::If, None, pos),
+            "ellers" => ops::Instruction::new(ops::Operator::Else, None, pos),
+            "slutt" => ops::Instruction::new(ops::Operator::End, None, pos),
+            "gjør" => ops::Instruction::new(ops::Operator::Do, None, pos),
+            "mens" => ops::Instruction::new(ops::Operator::While, None, pos),
+            "dup" => ops::Instruction::new(ops::Operator::Dup, None, pos),
+            "rot" => ops::Instruction::new(ops::Operator::Rot, None, pos),
+            "over" => ops::Instruction::new(ops::Operator::Over, None, pos),
+            "slipp" => ops::Instruction::new(ops::Operator::Drop, None, pos),
+            "bytt" => ops::Instruction::new(ops::Operator::Swap, None, pos),
+            "omgjør" => ops::Instruction::new(ops::Operator::Cast, None, pos),
             "=" => ops::Instruction::new(ops::Operator::Eq, None, pos),
             ">" => ops::Instruction::new(ops::Operator::Gt, None, pos),
             ">=" => ops::Instruction::new(ops::Operator::Ge, None, pos),
             "<" => ops::Instruction::new(ops::Operator::Lt, None, pos),
             "<=" => ops::Instruction::new(ops::Operator::Le, None, pos),
 
-            "nanpa" => ops::Instruction::new(
+            "heltall" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Int)),
                 pos,
             ),
-            "nanpa-waso" => ops::Instruction::new(
+            "flyttall" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Float)),
                 pos,
             ),
-            "sitelen" => ops::Instruction::new(
+            "streng" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Str)),
                 pos,
             ),
-            "lon" => ops::Instruction::new(
+            "sann" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::Bool(true)),
+                pos,
+            ),
+            "usann" => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Value::Bool(false)),
                 pos,
             ),
             x if x.parse::<i32>().is_ok() => ops::Instruction::new(
@@ -89,7 +94,7 @@ pub fn parse(
                 continue;
             }
             _ => {
-                let err_s: String = format!("Unknown word '{}'", token).to_owned();
+                let err_s: String = format!("ukjent ord '{}'", token).to_owned();
                 return Err((Box::leak(err_s.into_boxed_str()), pos.clone()));
             }
         });
