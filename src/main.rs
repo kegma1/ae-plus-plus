@@ -1,5 +1,5 @@
-use std::env;
 use std::collections::HashMap;
+use std::env;
 
 mod cross_ref;
 mod execute;
@@ -12,10 +12,10 @@ mod parse;
 pub struct Runtime {
     stack: Vec<ops::Value>,
     pub str_heap: Vec<String>,
-    pub def: HashMap<String, Option<ops::Value>>
+    pub def: HashMap<String, Option<ops::Value>>,
 }
 
-impl Runtime{
+impl Runtime {
     pub fn new() -> Self {
         Runtime {
             stack: vec![],
@@ -53,19 +53,22 @@ fn main() {
                 if let Err((e, pos)) = res {
                     println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
                 }
-                println!("\nStack: {:?}\nStrings: {:?}\nDefenitions: {:?}", ctx.stack, ctx.str_heap, ctx.def)
+                println!(
+                    "\nStack: {:?}\nStrings: {:?}\nDefenitions: {:?}",
+                    ctx.stack, ctx.str_heap, ctx.def
+                )
             }
-        },
+        }
         None => {
             let res = run(path);
             if let Err((e, pos)) = res {
                 println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
             }
         }
-    }    
+    }
 }
 
-fn debug_run(path:&String, ctx: &mut Runtime) -> Result<u8, (&'static str, ops::Pos)> {
+fn debug_run(path: &String, ctx: &mut Runtime) -> Result<u8, (&'static str, ops::Pos)> {
     let lexed = lex::lex(path)?;
     let mut parsed = parse::parse(lexed, ctx)?;
     let cross_refed = cross_ref::cross_reference(&mut parsed, &ctx)?;
@@ -75,7 +78,7 @@ fn debug_run(path:&String, ctx: &mut Runtime) -> Result<u8, (&'static str, ops::
     execute::execute(ctx, &cross_refed)
 }
 
-fn run(path:&String) -> Result<u8, (&'static str, ops::Pos)> {
+fn run(path: &String) -> Result<u8, (&'static str, ops::Pos)> {
     let mut ctx = Runtime::new();
 
     let lexed = lex::lex(path)?;

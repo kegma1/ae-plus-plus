@@ -2,13 +2,13 @@ use crate::ops;
 
 pub fn cross_reference(
     prg: &mut Vec<ops::Instruction>,
-    _ctx: &crate::Runtime
+    _ctx: &crate::Runtime,
 ) -> Result<Vec<ops::Instruction>, (&'static str, ops::Pos)> {
     let mut stack: Vec<usize> = vec![];
     for i in 0..prg.len() {
         let token = prg[i].op.clone();
         match token {
-            ops::Operator::If=> stack.push(i),
+            ops::Operator::If => stack.push(i),
             ops::Operator::While => stack.push(i),
             ops::Operator::Const => stack.push(i),
             ops::Operator::Else => {
@@ -17,7 +17,10 @@ pub fn cross_reference(
                     prg[if_i].arg = Some(i);
                     stack.push(i)
                 } else {
-                    return Err(("'ellers' kan bare stenge 'hvis' blokker", prg[if_i].pos.clone()));
+                    return Err((
+                        "'ellers' kan bare stenge 'hvis' blokker",
+                        prg[if_i].pos.clone(),
+                    ));
                 }
             }
             ops::Operator::End => {

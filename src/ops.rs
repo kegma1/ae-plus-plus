@@ -10,12 +10,7 @@ pub struct Instruction {
 }
 
 impl Instruction {
-    pub fn new(
-        op: Operator,
-        val: Option<Value>,
-        name: Option<String>,
-        pos: Pos,
-    ) -> Self {
+    pub fn new(op: Operator, val: Option<Value>, name: Option<String>, pos: Pos) -> Self {
         Instruction {
             op,
             arg: None,
@@ -39,7 +34,6 @@ impl fmt::Display for Instruction {
     }
 }
 
-
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Value {
     Int(i32),
@@ -51,16 +45,16 @@ pub enum Value {
 }
 
 impl fmt::Display for Value {
-fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    match self {
-        Value::Int(_) => write!(f, "Heltall"),
-        Value::Float(_) => write!(f, "Flyttall"),
-        Value::Bool(_) => write!(f, "Bool"),
-        Value::Str(_) => write!(f, "Str"),
-        Value::TypeLiteral(_) => write!(f, "TypeLitr"),
-        Value::Ptr(_) => write!(f, "Peker"),
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Value::Int(_) => write!(f, "Heltall"),
+            Value::Float(_) => write!(f, "Flyttall"),
+            Value::Bool(_) => write!(f, "Bool"),
+            Value::Str(_) => write!(f, "Str"),
+            Value::TypeLiteral(_) => write!(f, "TypeLitr"),
+            Value::Ptr(_) => write!(f, "Peker"),
+        }
     }
-}
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -68,9 +62,8 @@ pub enum TypeLiteral {
     Int,
     Float,
     Bool,
-    Str, 
+    Str,
 }
-
 
 pub type Pos = (usize, usize, String);
 pub type Ptr = usize;
@@ -92,7 +85,7 @@ pub enum Operator {
     Print,
     Input,
 
-    Read, // not yet implemented
+    Read,  // not yet implemented
     Write, // not yet implemented
 
     Not,

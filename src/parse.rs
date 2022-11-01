@@ -13,7 +13,6 @@ pub fn parse(
 ) -> Result<Vec<ops::Instruction>, (&'static str, ops::Pos)> {
     // println!("{:?}",prg);
 
-
     let mut parsed_prg: Vec<ops::Instruction> = vec![];
 
     let unwraped_prg = prg;
@@ -44,7 +43,10 @@ pub fn parse(
             "slipp" => ops::Instruction::new(ops::Operator::Drop, None, None, pos),
             "snu" => ops::Instruction::new(ops::Operator::Swap, None, None, pos),
             "omgjør" => ops::Instruction::new(ops::Operator::Cast, None, None, pos),
-            "konst" => {state = Mode::Define; ops::Instruction::new(ops::Operator::Const, None, None, pos)},
+            "konst" => {
+                state = Mode::Define;
+                ops::Instruction::new(ops::Operator::Const, None, None, pos)
+            }
             "=" => ops::Instruction::new(ops::Operator::Eq, None, None, pos),
             ">" => ops::Instruction::new(ops::Operator::Gt, None, None, pos),
             ">=" => ops::Instruction::new(ops::Operator::Ge, None, None, pos),
@@ -99,40 +101,27 @@ pub fn parse(
                 let unescaped_x = unescape(x).unwrap();
                 ctx.str_heap.push(unescaped_x);
                 let i = (ctx.str_heap.len() - 1) as usize;
-                ops::Instruction::new(
-                    ops::Operator::Literal,
-                    Some(ops::Value::Str(i)),
-                    None,
-                    pos,
-                )
+                ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Str(i)), None, pos)
             }
             "" => {
                 i += 1;
                 continue;
             }
-            _ => {
+            _ => match state {
+                Mode::Normal => {
+                    if !ctx.def.contains_key(&token) {
+                        let err_s: String = format!("ukjent ord '{}'", token).to_owned();
+                        return Err((Box::leak(err_s.into_boxed_str()), pos.clone()));
+                    }
 
-                match state {
-                    Mode::Normal => {
-                        if !ctx.def.contains_key(&token) {
-                            let err_s: String = format!("ukjent ord '{}'", token).to_owned();
-                            return Err((Box::leak(err_s.into_boxed_str()), pos.clone()));
-                        }
-
-                        ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
-                    },
-                    Mode::Define => {
-                        ctx.def.insert(token.clone(), None);
-                        state = Mode::Normal;
-                        ops::Instruction::new(
-                            ops::Operator::Word,
-                            None,
-                            Some(token),
-                            pos,
-                        )
-                    },
+                    ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
                 }
-            }
+                Mode::Define => {
+                    ctx.def.insert(token.clone(), None);
+                    state = Mode::Normal;
+                    ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
+                }
+            },
         });
 
         i += 1
