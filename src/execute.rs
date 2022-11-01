@@ -113,7 +113,7 @@ pub fn execute(
             }
             ops::Operator::Print => {
                 if ctx.stack.len() < 1 {
-                    return Err(("'toki' operator krever minst 1 argument", token.pos.clone()));
+                    return Err(("'skriv-ut' operator krever minst 1 argument", token.pos.clone()));
                 }
 
                 let print_val = ctx.pop().unwrap();
@@ -154,7 +154,7 @@ pub fn execute(
             }
             ops::Operator::Not => {
                 if ctx.stack.len() < 1 {
-                    return Err(("'ike' operator krever minst 1 argument", token.pos.clone()));
+                    return Err(("'ikke' operator krever minst 1 argument", token.pos.clone()));
                 }
 
                 let b = ctx.pop().unwrap();
@@ -170,7 +170,7 @@ pub fn execute(
             ops::Operator::And => {
                 if ctx.stack.len() < 2 {
                     return Err((
-                        "'en' operator krever minst 2 argumenter av samme type",
+                        "'og' operator krever minst 2 argumenter av samme type",
                         token.pos.clone(),
                     ));
                 }
@@ -192,7 +192,7 @@ pub fn execute(
             ops::Operator::Or => {
                 if ctx.stack.len() < 2 {
                     return Err((
-                        "'anu' operator krever minst 2 argumenter av samme type",
+                        "'eller' operator krever minst 2 argumenter av samme type",
                         token.pos.clone(),
                     ));
                 }
@@ -351,7 +351,7 @@ pub fn execute(
             }
             ops::Operator::If => {
                 if ctx.stack.len() < 1 {
-                    return Err(("'la' operator krever minst 1 argumente", token.pos.clone()));
+                    return Err(("'hvis' operator krever minst 1 argumente", token.pos.clone()));
                 }
 
                 let con = ctx.pop().unwrap();
@@ -398,7 +398,7 @@ pub fn execute(
             }
             ops::Operator::Do => {
                 if ctx.stack.len() < 1 {
-                    return Err(("'pali' operator krever minst 1 argument", token.pos.clone()));
+                    return Err(("'gjør' operator krever minst 1 argument", token.pos.clone()));
                 }
 
                 let con = ctx.pop().unwrap();
@@ -412,7 +412,7 @@ pub fn execute(
                     }
                 } else {
                     let err_s: String =
-                        format!("'pali {}' er ikke støttet. 'pali' only takes Bool", con)
+                        format!("'gjør {}' er ikke støttet. 'gjør' only takes Bool", con)
                             .to_owned();
                     return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
                 }
@@ -420,7 +420,7 @@ pub fn execute(
             ops::Operator::While | ops::Operator::Const => (),
             ops::Operator::Dup => {
                 if ctx.stack.len() < 1 {
-                    return Err(("'sin' operator krever minst 1 argument", token.pos.clone()));
+                    return Err(("'dup' operator krever minst 1 argument", token.pos.clone()));
                 }
 
                 let b = ctx.pop().unwrap();
@@ -430,7 +430,7 @@ pub fn execute(
             }
             ops::Operator::Drop => {
                 if ctx.stack.len() < 1 {
-                    return Err(("'sin' operator krever minst 1 argument", token.pos.clone()));
+                    return Err(("'slipp' operator krever minst 1 argument", token.pos.clone()));
                 }
 
                 let _ = ctx.pop().unwrap();
@@ -438,7 +438,7 @@ pub fn execute(
             ops::Operator::Swap => {
                 if ctx.stack.len() < 2 {
                     return Err((
-                        "'pakala' operator krever minst 1 argument",
+                        "'snu' operator krever minst 1 argument",
                         token.pos.clone(),
                     ));
                 }
@@ -463,7 +463,7 @@ pub fn execute(
             }
             ops::Operator::Rot => {
                 if ctx.stack.len() < 3 {
-                    return Err(("'sike' operator krever minst 1 argument", token.pos.clone()));
+                    return Err(("'rot' operator krever minst 1 argument", token.pos.clone()));
                 }
 
                 let b = ctx.pop().unwrap();
