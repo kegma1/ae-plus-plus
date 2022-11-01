@@ -1,4 +1,4 @@
 0 mens dup 15 <= gjør
-    dup si
+    dup skriv-ut
     1 +
 slutt
