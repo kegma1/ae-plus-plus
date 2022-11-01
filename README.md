@@ -4,11 +4,12 @@ Programmeringsspråk på norsk
 # todo
 - [x] Reworked runtime and execution
 - [ ] rework strings and memory
+- [ ] Add memory read and write
 - [ ] Add string manipulation
 - [ ] f strings
 - [x] Add type casting
 - [x] Add rest of stack operators
-- [ ] Add memory read and write
+- [x] Add constants
 - [ ] Add functions
 - [ ] Add import
 - [ ] Make better error system

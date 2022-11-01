@@ -1,10 +1,11 @@
 use std::fmt;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Instruction {
     pub op: Operator,
     pub arg: Option<Ptr>,
     pub val: Option<Value>,
+    pub name: Option<String>,
     pub pos: Pos,
 }
 
@@ -12,12 +13,14 @@ impl Instruction {
     pub fn new(
         op: Operator,
         val: Option<Value>,
+        name: Option<String>,
         pos: Pos,
     ) -> Self {
         Instruction {
             op,
             arg: None,
             val,
+            name,
             pos,
         }
     }
@@ -72,9 +75,12 @@ pub enum TypeLiteral {
 pub type Pos = (usize, usize, String);
 pub type Ptr = usize;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Operator {
     Literal, // Value
+    Const,
+
+    Word,
 
     Add,
     Sub,
@@ -86,8 +92,8 @@ pub enum Operator {
     Print,
     Input,
 
-    Read,
-    Write,
+    Read, // not yet implemented
+    Write, // not yet implemented
 
     Not,
     And,

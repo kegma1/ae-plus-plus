@@ -1,26 +1,26 @@
 use std::env;
+use std::collections::HashMap;
 
 mod cross_ref;
 mod execute;
 mod lex;
 mod ops;
 mod parse;
-const MEM_SIZE: usize = 360_000;
+// const MEM_SIZE: usize = 360_000;
+
 #[derive(Debug)]
 pub struct Runtime {
     stack: Vec<ops::Value>,
-    mem: [u8; MEM_SIZE],
-    len: usize,
     pub str_heap: Vec<String>,
+    pub def: HashMap<String, Option<ops::Value>>
 }
 
 impl Runtime{
     pub fn new() -> Self {
         Runtime {
             stack: vec![],
-            mem: [0u8; MEM_SIZE],
-            len: 0,
             str_heap: vec![],
+            def: HashMap::new(),
         }
     }
 
@@ -30,23 +30,6 @@ impl Runtime{
 
     pub fn pop(&mut self) -> Option<ops::Value> {
         self.stack.pop()
-    }
-
-    pub fn read(&mut self, addr: ops::Ptr, len: usize) -> Vec<u8> {
-        let mut output = vec![];
-        for i in addr..(addr + (len - 1)) {
-            output.push(self.mem[i])
-        }
-        output
-    }
-
-    pub fn write(&mut self, val: Vec<u8>) -> (ops::Ptr, usize) {
-        let addr = self.len;
-        for x in &val {
-            self.mem[self.len] = *x;
-            self.len += 1
-        }
-        (addr, val.len())
     }
 }
 
@@ -70,7 +53,7 @@ fn main() {
                 if let Err((e, pos)) = res {
                     println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
                 }
-                println!("\nstack: {:?}\nStrings: {:?}", ctx.stack, ctx.str_heap)
+                println!("\nStack: {:?}\nStrings: {:?}\nDefenitions: {:?}", ctx.stack, ctx.str_heap, ctx.def)
             }
         },
         None => {
@@ -85,7 +68,7 @@ fn main() {
 fn debug_run(path:&String, ctx: &mut Runtime) -> Result<u8, (&'static str, ops::Pos)> {
     let lexed = lex::lex(path)?;
     let mut parsed = parse::parse(lexed, ctx)?;
-    let cross_refed = cross_ref::cross_reference(&mut parsed)?;
+    let cross_refed = cross_ref::cross_reference(&mut parsed, &ctx)?;
     // for (i, inst) in cross_refed.iter().enumerate() {
     //     println!("{}: {}", i, inst)
     // }
@@ -97,6 +80,6 @@ fn run(path:&String) -> Result<u8, (&'static str, ops::Pos)> {
 
     let lexed = lex::lex(path)?;
     let mut parsed = parse::parse(lexed, &mut ctx)?;
-    let cross_refed = cross_ref::cross_reference(&mut parsed)?;
+    let cross_refed = cross_ref::cross_reference(&mut parsed, &ctx)?;
     execute::execute(&mut ctx, &cross_refed)
 }

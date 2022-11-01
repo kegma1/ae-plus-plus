@@ -284,7 +284,7 @@ pub fn execute(ctx: &mut Runtime, prg: & Vec<ops::Instruction>) -> Result<u8, (&
             },
             ops::Operator::If => {
                 if ctx.stack.len() < 1 {
-                    return Err(("'la' operator krever minst 2 argumenter av samme type", token.pos.clone()));
+                    return Err(("'la' operator krever minst 1 argumente", token.pos.clone()));
                 }
 
                 let con = ctx.pop().unwrap();
@@ -301,7 +301,27 @@ pub fn execute(ctx: &mut Runtime, prg: & Vec<ops::Instruction>) -> Result<u8, (&
                     return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
                 }
             },
-            ops::Operator::Else | ops::Operator::End => {
+            ops::Operator::End => {
+                if let Some(ptr) = token.arg {
+                    if let ops::Operator::Const = prg[ptr].op {
+                        if ctx.stack.len() < 1 {
+                            return Err(("'konst' definiasjon krever et element på topen av stabelen", token.pos.clone()));
+                        }
+                        let val = ctx.pop().unwrap();
+                        let name = &prg[ptr + 1].name;
+
+                        if let Some(key) = name {
+                            ctx.def.insert(key.to_string(), Some(val));
+                        } else {
+                            return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));
+                        }
+
+                    } else {
+                        i = ptr;
+                    }
+                }
+            }
+            ops::Operator::Else => {
                 if let Some(ptr) = token.arg {
                     i = ptr;
                 }
@@ -325,7 +345,7 @@ pub fn execute(ctx: &mut Runtime, prg: & Vec<ops::Instruction>) -> Result<u8, (&
                     return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
                 }
             },
-            ops::Operator::While => (),
+            ops::Operator::While | ops::Operator::Const => (),
             ops::Operator::Dup => {
                 if ctx.stack.len() < 1 {
                     return Err(("'sin' operator krever minst 1 argument", token.pos.clone()));
@@ -451,19 +471,15 @@ pub fn execute(ctx: &mut Runtime, prg: & Vec<ops::Instruction>) -> Result<u8, (&
                     }
                 }
             },
-            ops::Operator::Read => {
-                if ctx.stack.len() < 2 {
-                    return Err(("',' operator krever minst 1 argument", token.pos.clone()));
-                }
-
-                let addr = ctx.pop().unwrap();
-                let len = ctx.pop().unwrap();
-
-                if let (ops::Value::Ptr(x), ops::Value::Int(y)) = (addr, len) {
-                    let res = ctx.read(x, y as usize);
+            ops::Operator::Read => todo!(),
+            ops::Operator::Write => todo!(),
+            ops::Operator::Word => {
+                if let Some(key) = &token.name {
+                    if let Some(val) = ctx.def[key] {
+                        ctx.push(val)
+                    }
                 }
             },
-            ops::Operator::Write => todo!(),
         }
         // println!("{:?}", token.op);
         i += 1;

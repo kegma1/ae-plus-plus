@@ -1,0 +1,11 @@
+konst x 34 35 + slutt
+konst y 351 slutt
+
+x skriv-ut
+y x + skriv-ut
+
+konst navn 
+    "hva heter du? " spør 
+slutt
+
+"hei " navn + skriv-ut
