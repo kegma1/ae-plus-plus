@@ -1,4 +1,2 @@
-0 mens dup 15 <= gjør
-    dup skriv-ut
-    1 +
-slutt
+konst x 69 slutt
+x skriv-ut
