@@ -1,0 +1,13 @@
+1 mens dup 100 <= gjør
+    dup dup 5 / slipp 0 = snu 3 / slipp 0 = og hvis
+        "fizzbuzz" skriv-ut
+    ellers dup 3 / slipp 0 = hvis
+        "fizz" skriv-ut
+    ellers dup 5 / slipp 0 = hvis
+        "buzz" skriv-ut
+    ellers
+        dup skriv-ut
+    slutt slutt slutt
+
+    1 +
+slutt
