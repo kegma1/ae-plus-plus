@@ -32,6 +32,8 @@ pub fn lex(path: &String) -> Result<Vec<(String, Pos)>, (&'static str, Pos)> {
                                 prg.push((word.clone(), (i + 1, col, path.clone())));
                                 col += word.len() + 1;
                                 word.clear();
+                            } else {
+                                col += 1;
                             }
                         }
                         (_, _) => word.push(char),
