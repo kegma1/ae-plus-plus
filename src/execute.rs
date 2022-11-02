@@ -351,7 +351,7 @@ pub fn execute(
             }
             ops::Operator::If => {
                 if ctx.stack.len() < 1 {
-                    return Err(("'hvis' operator krever minst 1 argumente", token.pos.clone()));
+                    return Err(("'hvis' operator krever minst 1 argumentet", token.pos.clone()));
                 }
 
                 let con = ctx.pop().unwrap();
@@ -374,14 +374,22 @@ pub fn execute(
                     if let ops::Operator::Const = prg[ptr].op {
                         if ctx.stack.len() < 1 {
                             return Err((
-                                "'konst' definiasjon krever et element på topen av stabelen",
+                                "'konst' definisjon krever et element på toppen av stabelen",
                                 token.pos.clone(),
                             ));
                         }
                         let val = ctx.pop().unwrap();
                         let name = &prg[ptr + 1].name;
+                        
 
                         if let Some(key) = name {
+                            if ctx.def[key] != None {
+                                let err_s: String = format!("'{}' kan ikke omdefineres ettersom den er konstant", key).to_owned();
+                                return Err((
+                                    Box::leak(err_s.into_boxed_str()),
+                                    token.pos.clone(),
+                                ));
+                            } 
                             ctx.def.insert(key.to_string(), Some(val));
                         } else {
                             return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));

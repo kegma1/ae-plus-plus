@@ -9,3 +9,6 @@ konst navn
 slutt
 
 "hei " navn + skriv-ut
+
+konst x 5 slutt
+x skriv-ut
