@@ -78,3 +78,43 @@ I Æ++ vill nesten alt av operasjoner fungere på top elementene på stabelen. U
 |snu|`a b -> b a`|
 |over|`a b -> a b a`|
 #
+### typer
+| navn |Beskrivelse|
+|:---------:|:------------|
+|heltall|`i32`|
+|flyttall|`f32`|
+|bool|`bool`|
+|streng|`string`|
+#
+### omgjør
+```
+  "69"   heltall omgjør
+# ^verdi ^type
+```
+#
+### konst nøkkelord
+```
+konst x 35 34 + slutt
+
+x skriv-ut # dette vil skrive ut 69
+```
+#
+### hvis og ellers
+```
+"skriv et tall: " spør heltall omgjør
+10 > hvis
+    "større enn 10"
+ellers
+    "mindre enn 10"
+slutt
+skriv-ut
+``` 
+#
+### mens løkker
+```
+0 mens dup 15 <= gjør
+    dup skriv-ut
+    1 +
+slutt
+# skriver ut alle tallene fra 0 til 15
+```
