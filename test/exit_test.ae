@@ -1,0 +1,6 @@
+"Skriv 5: " spør Int omgjør
+5 = hvis
+    5 skriv-ut
+    0 avslutt
+slutt
+mens Sann gjør slutt

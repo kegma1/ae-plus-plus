@@ -1,0 +1,9 @@
+"Skriv enten 1 eller 0: " spør Int omgjør
+
+0 = hvis
+    0 skriv-ut
+ellers
+    mens Sann gjør
+        1 skriv-ut
+    slutt
+slutt

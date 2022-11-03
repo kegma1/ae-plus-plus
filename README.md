@@ -34,7 +34,7 @@ Flagg er frivillig.
 
 ## Stack
 Æ++ er et stable basert programmeringsspråk. Det vil si at programmert fungerer veldig annerledes enn i konvensjonell språk.
-I Æ++ vill nesten alt av operasjoner fungere på top elementene på stabelen. Under er et simpel program som plusser to heltall sammen, og hvordan hver operasjon endrer stabelen
+I Æ++ vill nesten alt av operasjoner fungere på top elementene på stabelen. Under er et simpel program som plusser to Int sammen, og hvordan hver operasjon endrer stabelen
 ```
 35 34 +
 -------------------------------------------------------
@@ -97,16 +97,16 @@ I Æ++ vill nesten alt av operasjoner fungere på top elementene på stabelen. U
 ### typer
 | navn |Beskrivelse|
 |:---------:|:------------|
-|heltall|`i32`|
-|flyttall|`f32`|
+|Int|`i32`|
+|Flyt|`f32`|
 |bool|`bool`|
 |streng|`string`|
 #
 ### omgjør
 ```
-  "69"   heltall omgjør
+  "69"   Int omgjør
 # ^verdi ^type
-skriv-ut # vil skrive ut 69 som et heltall
+skriv-ut # vil skrive ut 69 som et Int
 ```
 #
 ### konst nøkkelord
@@ -118,7 +118,7 @@ x skriv-ut # dette vil skrive ut 69
 #
 ### hvis og ellers
 ```
-"skriv et tall: " spør heltall omgjør
+"skriv et tall: " spør Int omgjør
 10 > hvis
     "større enn 10"
 ellers

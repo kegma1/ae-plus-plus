@@ -39,20 +39,22 @@ pub enum Value {
     Int(i32),
     Float(f32),
     Bool(bool),
-    Str(Ptr), // index in str_heap
-    Ptr(Ptr),
+    Str(Ptr), // index in str_heap skal ut
     TypeLiteral(TypeLiteral),
+    Ptr(Ptr), // ikke implementert
+    Byte(u8), //ikke implementert
 }
 
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Value::Int(_) => write!(f, "Heltall"),
-            Value::Float(_) => write!(f, "Flyttall"),
+            Value::Int(_) => write!(f, "Int"),
+            Value::Float(_) => write!(f, "Flyt"),
             Value::Bool(_) => write!(f, "Bool"),
             Value::Str(_) => write!(f, "Str"),
             Value::TypeLiteral(_) => write!(f, "TypeLitr"),
             Value::Ptr(_) => write!(f, "Peker"),
+            Value::Byte(_) => write!(f, "Byte"),
         }
     }
 }
@@ -63,6 +65,7 @@ pub enum TypeLiteral {
     Float,
     Bool,
     Str,
+    Byte
 }
 
 pub type Pos = (usize, usize, String);
@@ -87,6 +90,7 @@ pub enum Operator {
 
     Read,  // not yet implemented
     Write, // not yet implemented
+    Exit,
 
     Not,
     And,

@@ -42,6 +42,7 @@ pub fn parse(
             "over" => ops::Instruction::new(ops::Operator::Over, None, None, pos),
             "slipp" => ops::Instruction::new(ops::Operator::Drop, None, None, pos),
             "snu" => ops::Instruction::new(ops::Operator::Swap, None, None, pos),
+            "avslutt" => ops::Instruction::new(ops::Operator::Exit, None, None, pos),
             "omgjør" => ops::Instruction::new(ops::Operator::Cast, None, None, pos),
             "konst" => {
                 state = Mode::Define;
@@ -55,36 +56,42 @@ pub fn parse(
             "," => ops::Instruction::new(ops::Operator::Read, None, None, pos),
             "." => ops::Instruction::new(ops::Operator::Write, None, None, pos),
 
-            "heltall" => ops::Instruction::new(
+            "Int" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Int)),
                 None,
                 pos,
             ),
-            "flyttall" => ops::Instruction::new(
+            "Flyt" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Float)),
                 None,
                 pos,
             ),
-            "streng" => ops::Instruction::new(
+            "Streng" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Str)),
                 None,
                 pos,
             ),
-            "sann" => ops::Instruction::new(
+            "Sann" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::Bool(true)),
                 None,
                 pos,
             ),
-            "usann" => ops::Instruction::new(
+            "Usann" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::Bool(false)),
                 None,
                 pos,
             ),
+            "Byte" => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Value::TypeLiteral(ops::TypeLiteral::Byte)),
+                None,
+                pos,
+            ), 
             x if x.parse::<i32>().is_ok() => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::Int(x.parse::<i32>().unwrap())),
@@ -102,6 +109,34 @@ pub fn parse(
                 ctx.str_heap.push(unescaped_x);
                 let i = (ctx.str_heap.len() - 1) as usize;
                 ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Str(i)), None, pos)
+            }
+            x if x.chars().nth(0) == Some('b') => {
+                if x.len() != 9 {
+                    return Err(("Kunne ikke oversette 'Byte'", pos));
+                }
+
+                let mut byte = x.chars();
+                byte.next();
+                let res = u8::from_str_radix(byte.as_str(), 2);
+                if let Ok(u) = res {
+                    ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Byte(u)), None, pos)
+                } else {
+                    return Err(("Kunne ikke oversette 'Byte'", pos));
+                }
+            }
+            x if x.chars().nth(0) == Some('x') => {
+                if x.len() != 3 {
+                    return Err(("Kunne ikke oversette 'Byte'", pos));
+                }
+
+                let mut byte = x.chars();
+                byte.next();
+                let res = u8::from_str_radix(byte.as_str(), 16);
+                if let Ok(u) = res {
+                    ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Byte(u)), None, pos)
+                } else {
+                    return Err(("Kunne ikke oversette 'Byte'", pos));
+                }
             }
             "" => {
                 i += 1;

@@ -125,6 +125,7 @@ pub fn execute(
                     ops::Value::Str(x) => print!("{}\n", ctx.str_heap[x]),
                     ops::Value::TypeLiteral(_) => todo!("print for TypeLiter is not implemented"),
                     ops::Value::Ptr(_) => todo!("print for Pointer is not implemented"),
+                    ops::Value::Byte(x) => print!("{:#02x}\n", x),
                 }
             }
             ops::Operator::Input => {
@@ -508,7 +509,7 @@ pub fn execute(
                                 ctx.push(ops::Value::Int(new_x));
                             } else {
                                 return Err((
-                                    "Fikk ikke til å omgjøre til Heltall",
+                                    "Fikk ikke til å omgjøre til Int",
                                     token.pos.clone(),
                                 ));
                             }
@@ -533,7 +534,7 @@ pub fn execute(
                                 ctx.push(ops::Value::Float(new_x));
                             } else {
                                 return Err((
-                                    "Fikk ikke til å omgjøre til Flyttall",
+                                    "Fikk ikke til å omgjøre til Flyt",
                                     token.pos.clone(),
                                 ));
                             }
@@ -581,6 +582,24 @@ pub fn execute(
                     }
                 }
             }
+            ops::Operator::Exit => {
+                if ctx.stack.len() < 1 {
+                    return Err((
+                        "'avslutt' operator krever minst 1 argument",
+                        token.pos.clone(),
+                    ));
+                }
+
+                let code = ctx.pop().unwrap();
+                if let ops::Value::Int(x) = code {
+                    return Ok(x as u8);
+                } else {
+                    return Err((
+                        "Avslutnings kode må være ett 'Int'",
+                        token.pos.clone(),
+                    ));
+                }
+            },
         }
         // println!("{:?}", token.op);
         i += 1;

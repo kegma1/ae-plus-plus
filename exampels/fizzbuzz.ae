@@ -7,7 +7,7 @@
         "buzz" 
     slutt slutt slutt
     
-    dup heltall = hvis
+    dup Int = hvis
         dup 
     slutt
 
