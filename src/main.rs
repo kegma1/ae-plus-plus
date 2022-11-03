@@ -54,7 +54,7 @@ fn main() {
                     println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
                 }
                 println!(
-                    "\nStack: {:?}\nStrings: {:?}\nDefenitions: {:?}",
+                    "\nStabel: {:?}\nStrenger: {:?}\nDefinisjoner: {:?}",
                     ctx.stack, ctx.str_heap, ctx.def
                 )
             }
