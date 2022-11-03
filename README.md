@@ -14,6 +14,22 @@ Programmeringsspråk på norsk
 - [ ] Add import
 - [ ] Make better error system
 
+# Hvordan bruke
+## Windows
+Du trenger [git](https://git-scm.com/) og [rust](https://www.rust-lang.org/) installert først
+```
+git clone https://github.com/kegma1/ae-plus-plus.git
+cd .\ae-plus-plus
+python.exe .\install.py
+.\aepp.exe <-Flagg> [./Sti]
+```
+
+## Flagg
+Flagg er frivillig.
+| Flagg |Beskrivelse|
+|:---------:|:------------|
+|-d|Debug flagg, vil skrive ut stabelen når programmet kræsjer.|
+
 # Referanse
 
 ## Stack
@@ -90,6 +106,7 @@ I Æ++ vill nesten alt av operasjoner fungere på top elementene på stabelen. U
 ```
   "69"   heltall omgjør
 # ^verdi ^type
+skriv-ut # vil skrive ut 69 som et heltall
 ```
 #
 ### konst nøkkelord
