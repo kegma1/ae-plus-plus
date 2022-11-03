@@ -25,6 +25,7 @@ pub fn execute(
 
                 match (a, b) {
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x + y)),
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x + y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Float(x + y))
                     }
@@ -54,6 +55,7 @@ pub fn execute(
 
                 match (a, b) {
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x - y)),
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x - y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Float(x - y))
                     }
@@ -76,6 +78,7 @@ pub fn execute(
 
                 match (a, b) {
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x * y)),
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x * y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Float(x * y))
                     }
@@ -101,6 +104,10 @@ pub fn execute(
                         ctx.push(ops::Value::Int(x % y));
                         ctx.push(ops::Value::Int(x / y))
                     }
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => {
+                        ctx.push(ops::Value::Byte(x % y));
+                        ctx.push(ops::Value::Byte(x / y))
+                    }
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Float(x % y));
                         ctx.push(ops::Value::Float(x / y))
@@ -121,11 +128,12 @@ pub fn execute(
                 match print_val {
                     ops::Value::Int(x) => print!("{}\n", x),
                     ops::Value::Float(x) => print!("{}\n", x),
-                    ops::Value::Bool(x) => print!("{}\n", x),
+                    ops::Value::Bool(x) => print!("{}\n", if x {"Sann"} else {"Usann"}),
                     ops::Value::Str(x) => print!("{}\n", ctx.str_heap[x]),
                     ops::Value::TypeLiteral(_) => todo!("print for TypeLiter is not implemented"),
                     ops::Value::Ptr(_) => todo!("print for Pointer is not implemented"),
                     ops::Value::Byte(x) => print!("{:#02x}\n", x),
+                    ops::Value::Char(x) => print!("{}\n", x),
                 }
             }
             ops::Operator::Input => {
@@ -162,6 +170,8 @@ pub fn execute(
 
                 match b {
                     ops::Value::Bool(x) => ctx.push(ops::Value::Bool(!x)),
+                    ops::Value::Int(x) => ctx.push(ops::Value::Int(!x)),
+                    ops::Value::Byte(x) => ctx.push(ops::Value::Byte(!x)),
                     _ => {
                         let err_s: String = format!("'ike {}' er ikke støttet", b).to_owned();
                         return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
@@ -184,6 +194,7 @@ pub fn execute(
                         ctx.push(ops::Value::Bool(x && y))
                     }
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x & y)),
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x & y)),
                     (_, _) => {
                         let err_s: String = format!("'{} en {}' er ikke støttet", a, b).to_owned();
                         return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
@@ -206,6 +217,7 @@ pub fn execute(
                         ctx.push(ops::Value::Bool(x || y))
                     }
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x | y)),
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x | y)),
                     (_, _) => {
                         let err_s: String = format!("'{} anu {}' er ikke støttet", a, b).to_owned();
                         return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
@@ -228,6 +240,7 @@ pub fn execute(
                         ctx.push(ops::Value::Bool(x == y))
                     }
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Bool(x == y)),
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Bool(x == y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Bool(x == y))
                     }
@@ -268,6 +281,7 @@ pub fn execute(
                 match (a, b) {
                     (ops::Value::Bool(x), ops::Value::Bool(y)) => ctx.push(ops::Value::Bool(x < y)),
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Bool(x < y)),
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Bool(x < y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Bool(x < y))
                     }
@@ -293,6 +307,7 @@ pub fn execute(
                         ctx.push(ops::Value::Bool(x <= y))
                     }
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Bool(x <= y)),
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Bool(x <= y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Bool(x <= y))
                     }
@@ -316,6 +331,7 @@ pub fn execute(
                 match (a, b) {
                     (ops::Value::Bool(x), ops::Value::Bool(y)) => ctx.push(ops::Value::Bool(x > y)),
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Bool(x > y)),
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Bool(x > y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Bool(x > y))
                     }
@@ -341,6 +357,7 @@ pub fn execute(
                         ctx.push(ops::Value::Bool(x >= y))
                     }
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Bool(x >= y)),
+                    (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Bool(x >= y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Bool(x >= y))
                     }
@@ -509,7 +526,7 @@ pub fn execute(
                                 ctx.push(ops::Value::Int(new_x));
                             } else {
                                 return Err((
-                                    "Fikk ikke til å omgjøre til Int",
+                                    "Fikk ikke til å omgjøre til Helt",
                                     token.pos.clone(),
                                 ));
                             }
@@ -595,7 +612,7 @@ pub fn execute(
                     return Ok(x as u8);
                 } else {
                     return Err((
-                        "Avslutnings kode må være ett 'Int'",
+                        "Avslutnings kode må være ett 'Helt'",
                         token.pos.clone(),
                     ));
                 }

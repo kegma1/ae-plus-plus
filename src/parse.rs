@@ -56,7 +56,7 @@ pub fn parse(
             "," => ops::Instruction::new(ops::Operator::Read, None, None, pos),
             "." => ops::Instruction::new(ops::Operator::Write, None, None, pos),
 
-            "Int" => ops::Instruction::new(
+            "Helt" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Int)),
                 None,
@@ -68,9 +68,15 @@ pub fn parse(
                 None,
                 pos,
             ),
-            "Streng" => ops::Instruction::new(
+            "Str" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Str)),
+                None,
+                pos,
+            ),
+            "Bokst" => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Value::TypeLiteral(ops::TypeLiteral::Char)),
                 None,
                 pos,
             ),
@@ -109,6 +115,13 @@ pub fn parse(
                 ctx.str_heap.push(unescaped_x);
                 let i = (ctx.str_heap.len() - 1) as usize;
                 ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Str(i)), None, pos)
+            }
+            x if x.chars().nth(0) == Some('\'') => {
+                let quoted = unescape(("\"".to_string() + &x + "\"").as_str()).unwrap();
+                let mut unescaped_x = quoted.chars();
+                unescaped_x.next();
+                unescaped_x.next_back();
+                ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Char(unescaped_x.next().unwrap())), None, pos)
             }
             x if x.chars().nth(0) == Some('b') => {
                 if x.len() != 9 {

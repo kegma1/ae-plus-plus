@@ -43,18 +43,20 @@ pub enum Value {
     TypeLiteral(TypeLiteral),
     Ptr(Ptr), // ikke implementert
     Byte(u8), //ikke implementert
+    Char(char), 
 }
 
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Value::Int(_) => write!(f, "Int"),
+            Value::Int(_) => write!(f, "Helt"),
             Value::Float(_) => write!(f, "Flyt"),
             Value::Bool(_) => write!(f, "Bool"),
             Value::Str(_) => write!(f, "Str"),
             Value::TypeLiteral(_) => write!(f, "TypeLitr"),
             Value::Ptr(_) => write!(f, "Peker"),
             Value::Byte(_) => write!(f, "Byte"),
+            Value::Char(_) => write!(f, "Bokst"),
         }
     }
 }
@@ -65,7 +67,8 @@ pub enum TypeLiteral {
     Float,
     Bool,
     Str,
-    Byte
+    Byte,
+    Char,
 }
 
 pub type Pos = (usize, usize, String);

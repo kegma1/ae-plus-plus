@@ -1,4 +1,4 @@
-"Skriv 5: " spør Int omgjør
+"Skriv 5: " spør Helt omgjør
 5 = hvis
     5 skriv-ut
     0 avslutt

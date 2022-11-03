@@ -27,6 +27,14 @@ pub fn lex(path: &String) -> Result<Vec<(String, Pos)>, (&'static str, Pos)> {
                             word.push(char);
                             mode = Mode::Normal
                         }
+                        ('\'', Mode::Normal) => {
+                            word.push(char);
+                            mode = Mode::String
+                        }
+                        ('\'', Mode::String) => {
+                            word.push(char);
+                            mode = Mode::Normal
+                        }
                         (' ', Mode::Normal) => {
                             if !word.is_empty() {
                                 prg.push((word.clone(), (i + 1, col, path.clone())));

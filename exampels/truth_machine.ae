@@ -1,4 +1,4 @@
-"Skriv enten 1 eller 0: " spør Int omgjør
+"Skriv enten 1 eller 0: " spør Helt omgjør
 
 0 = hvis
     0 skriv-ut
