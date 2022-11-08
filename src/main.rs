@@ -6,11 +6,12 @@ mod execute;
 mod lex;
 mod ops;
 mod parse;
-// const MEM_SIZE: usize = 360_000;
 
 #[derive(Debug)]
 pub struct Runtime {
     stack: Vec<ops::Value>,
+    mem: Vec<ops::Value>,
+    top: usize,
     pub str_heap: Vec<String>,
     pub def: HashMap<String, Option<ops::Value>>,
 }
@@ -20,6 +21,8 @@ impl Runtime {
         Runtime {
             stack: vec![],
             str_heap: vec![],
+            mem: vec![],
+            top: 0,
             def: HashMap::new(),
         }
     }
@@ -30,6 +33,19 @@ impl Runtime {
 
     pub fn pop(&mut self) -> Option<ops::Value> {
         self.stack.pop()
+    }
+
+    pub fn write(&mut self, data: &Vec<ops::Value>) -> (ops::Ptr, usize) {
+        let ptr = self.top;
+        for val in data {
+            self.mem.push(val.clone());
+            self.top += 1;
+        }
+        (ptr, data.len())
+    }
+
+    pub fn read(_ptr: ops::Ptr, _len: usize) {
+        
     }
 }
 
@@ -54,8 +70,8 @@ fn main() {
                     println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
                 }
                 println!(
-                    "\nStabel: {:?}\nStrenger: {:?}\nDefinisjoner: {:?}",
-                    ctx.stack, ctx.str_heap, ctx.def
+                    "\nStabel: {:?}\nStrenger: {:?}\nDefinisjoner: {:?}\nMinne: {:?}",
+                    ctx.stack, ctx.str_heap, ctx.def, ctx.mem
                 )
             }
         }

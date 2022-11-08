@@ -39,11 +39,13 @@ pub enum Value {
     Int(i32),
     Float(f32),
     Bool(bool),
-    Str(Ptr), // index in str_heap skal ut
+    Str((Ptr, usize)), // Pointer to data in memory, size of string
+    // Str(Ptr),
     TypeLiteral(TypeLiteral),
     Ptr(Ptr), // ikke implementert
     Byte(u8), //ikke implementert
     Char(char), 
+    Null
 }
 
 impl fmt::Display for Value {
@@ -57,6 +59,7 @@ impl fmt::Display for Value {
             Value::Ptr(_) => write!(f, "Peker"),
             Value::Byte(_) => write!(f, "Byte"),
             Value::Char(_) => write!(f, "Bokst"),
+            Value::Null => write!(f, "Null"),
         }
     }
 }

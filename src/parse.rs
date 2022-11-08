@@ -111,17 +111,15 @@ pub fn parse(
                 pos,
             ),
             x if x.chars().nth(0) == Some('"') => {
-                let unescaped_x = unescape(x).unwrap();
-                ctx.str_heap.push(unescaped_x);
-                let i = (ctx.str_heap.len() - 1) as usize;
-                ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Str(i)), None, pos)
-            }
-            x if x.chars().nth(0) == Some('\'') => {
-                let quoted = unescape(("\"".to_string() + &x + "\"").as_str()).unwrap();
-                let mut unescaped_x = quoted.chars();
-                unescaped_x.next();
-                unescaped_x.next_back();
-                ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Char(unescaped_x.next().unwrap())), None, pos)
+                let unescaped_x = parse_char(x);
+
+                if unescaped_x.len() <= 1 {
+                    ops::Instruction::new(ops::Operator::Literal, Some(unescaped_x[0]), None, pos)
+                } else {
+                    let res = ctx.write(&unescaped_x);
+                    ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Str(res)), None, pos)
+                }
+                
             }
             x if x.chars().nth(0) == Some('b') => {
                 if x.len() != 9 {
@@ -180,4 +178,15 @@ pub fn parse(
     // }
 
     Ok(parsed_prg)
+}
+
+fn parse_char(x: &str) -> Vec<ops::Value> {
+    let quoted = unescape(x).unwrap();
+    let unescaped_x = quoted.chars();
+    let mut res = vec![];
+    for x in unescaped_x {
+        res.push(ops::Value::Char(x))
+    }
+    println!("{:?}", res);
+    res
 }
