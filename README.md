@@ -3,8 +3,10 @@ Programmeringsspråk på norsk
 
 # todo
 - [x] Reworked runtime and execution
-- [ ] rework strings and memory
-- [ ] Add memory read and write
+- [x] rework strings and memory
+- [x] Add memory read and write
+- [ ] pointer menipulation
+- [ ] structurs
 - [ ] Add string manipulation
 - [ ] f strings
 - [x] Add type casting
