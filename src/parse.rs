@@ -97,7 +97,7 @@ pub fn parse(
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Byte)),
                 None,
                 pos,
-            ), 
+            ),
             x if x.parse::<i32>().is_ok() => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::Int(x.parse::<i32>().unwrap())),
@@ -117,9 +117,13 @@ pub fn parse(
                     ops::Instruction::new(ops::Operator::Literal, Some(unescaped_x[0]), None, pos)
                 } else {
                     let res = ctx.write(&unescaped_x);
-                    ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Str(res)), None, pos)
+                    ops::Instruction::new(
+                        ops::Operator::Literal,
+                        Some(ops::Value::Str(res)),
+                        None,
+                        pos,
+                    )
                 }
-                
             }
             x if x.chars().nth(0) == Some('b') => {
                 if x.len() != 9 {
@@ -130,7 +134,12 @@ pub fn parse(
                 byte.next();
                 let res = u8::from_str_radix(byte.as_str(), 2);
                 if let Ok(u) = res {
-                    ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Byte(u)), None, pos)
+                    ops::Instruction::new(
+                        ops::Operator::Literal,
+                        Some(ops::Value::Byte(u)),
+                        None,
+                        pos,
+                    )
                 } else {
                     return Err(("Kunne ikke oversette 'Byte'", pos));
                 }
@@ -144,7 +153,12 @@ pub fn parse(
                 byte.next();
                 let res = u8::from_str_radix(byte.as_str(), 16);
                 if let Ok(u) = res {
-                    ops::Instruction::new(ops::Operator::Literal, Some(ops::Value::Byte(u)), None, pos)
+                    ops::Instruction::new(
+                        ops::Operator::Literal,
+                        Some(ops::Value::Byte(u)),
+                        None,
+                        pos,
+                    )
                 } else {
                     return Err(("Kunne ikke oversette 'Byte'", pos));
                 }

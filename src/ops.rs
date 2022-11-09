@@ -44,8 +44,8 @@ pub enum Value {
     TypeLiteral(TypeLiteral),
     Ptr(Ptr), // ikke implementert
     Byte(u8), //ikke implementert
-    Char(char), 
-    Null
+    Char(char),
+    Null,
 }
 
 impl fmt::Display for Value {
