@@ -36,7 +36,7 @@ pub fn parse(
             "ellers" => ops::Instruction::new(ops::Operator::Else, None, None, pos),
             "slutt" => ops::Instruction::new(ops::Operator::End, None, None, pos),
             "gjør" => ops::Instruction::new(ops::Operator::Do, None, None, pos),
-            "mens" => ops::Instruction::new(ops::Operator::While, None, None, pos),
+            "når" => ops::Instruction::new(ops::Operator::While, None, None, pos),
             "dup" => ops::Instruction::new(ops::Operator::Dup, None, None, pos),
             "rot" => ops::Instruction::new(ops::Operator::Rot, None, None, pos),
             "over" => ops::Instruction::new(ops::Operator::Over, None, None, pos),
@@ -187,6 +187,5 @@ fn parse_char(x: &str) -> Vec<ops::Value> {
     for x in unescaped_x {
         res.push(ops::Value::Char(x))
     }
-    println!("{:?}", res);
     res
 }

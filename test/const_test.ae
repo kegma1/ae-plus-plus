@@ -10,7 +10,7 @@ slutt
 
 "hei " navn + skriv-ut
 
-0 mens dup 5 <= gjør
+0 når dup 5 <= gjør
     konst z dup + 1 slutt
     1 +
 slutt

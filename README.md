@@ -127,9 +127,9 @@ slutt
 skriv-ut
 ``` 
 #
-### mens løkker
+### når løkker
 ```
-0 mens dup 15 <= gjør
+0 når dup 15 <= gjør
     dup skriv-ut
     1 +
 slutt

@@ -44,8 +44,12 @@ impl Runtime {
         (ptr, data.len())
     }
 
-    pub fn read(_ptr: ops::Ptr, _len: usize) {
-        
+    pub fn read(&self, ptr: ops::Ptr) -> Option<ops::Value> {
+        self.mem.get(ptr).copied()
+    }
+
+    pub fn read_data(&self, ptr: ops::Ptr, len: usize) -> Option<&[ops::Value]> {
+        self.mem.get(ptr..(ptr + len))
     }
 }
 

@@ -131,7 +131,9 @@ pub fn execute(
                     ops::Value::Int(x) => print!("{}\n", x),
                     ops::Value::Float(x) => print!("{}\n", x),
                     ops::Value::Bool(x) => print!("{}\n", if x {"Sann"} else {"Usann"}),
-                    ops::Value::Str(x) => print!("{:?}\n", x),
+                    ops::Value::Str(x) => {
+                        let s = ctx.read_data(x.0, x.1).unwrap().iter().map(|x| if let ops::Value::Char(c) = x {c.clone()} else {'\0'}).collect::<String>();
+                        print!("{}\n", s)},
                     ops::Value::TypeLiteral(_) => todo!("print for TypeLiter is not implemented"),
                     ops::Value::Ptr(_) => todo!("print for Pointer is not implemented"),
                     ops::Value::Byte(x) => print!("{:#02x}\n", x),
