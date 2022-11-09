@@ -1,8 +1,5 @@
-use std::io::{stdout, Write};
-
 use crate::{ops, Runtime};
-// use snailquote::unescape;
-// use std::io::{stdin, stdout, Write};
+use std::io::{stdin, stdout, Write};
 
 pub fn execute(
     ctx: &mut Runtime,
@@ -31,13 +28,15 @@ pub fn execute(
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Float(x + y))
                     }
-                    // (ops::Value::Str(x), ops::Value::Str(y)) => {
-                    //     let mut new_str: String = ctx.str_heap[x].clone();
-                    //     new_str.push_str(ctx.str_heap[y].as_str());
+                    (ops::Value::Str(x), ops::Value::Str(y)) => {
+                        let s1: String = ctx.read_str(&ops::Value::Str(x)).unwrap().clone();
+                        let s2: String = ctx.read_str(&ops::Value::Str(y)).unwrap().clone();
+                        
+                        let new_str = s1 + &s2;
 
-                    //     ctx.str_heap.push(new_str);
-                    //     ctx.push(ops::Value::Str(ctx.str_heap.len() - 1 as usize))
-                    // }
+                        let res = ctx.write(&crate::parse::parse_char(&new_str));
+                        ctx.push(ops::Value::Str(res))
+                    }
                     (_, _) => {
                         let err_s: String = format!("'{} + {}' er ikke støttet", a, b).to_owned();
                         return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
@@ -134,21 +133,7 @@ pub fn execute(
                     ops::Value::Int(x) => print!("{}\n", x),
                     ops::Value::Float(x) => print!("{}\n", x),
                     ops::Value::Bool(x) => print!("{}\n", if x { "Sann" } else { "Usann" }),
-                    ops::Value::Str(x) => {
-                        let s = ctx
-                            .read_data(x.0, x.1)
-                            .unwrap()
-                            .iter()
-                            .map(|x| {
-                                if let ops::Value::Char(c) = x {
-                                    c.clone()
-                                } else {
-                                    '\0'
-                                }
-                            })
-                            .collect::<String>();
-                        print!("{}\n", s)
-                    }
+                    ops::Value::Str(_) => print!("{}\n", ctx.read_str(&print_val).unwrap()),
                     ops::Value::TypeLiteral(_) => todo!("print for TypeLiter is not implemented"),
                     ops::Value::Ptr(_) => todo!("print for Pointer is not implemented"),
                     ops::Value::Byte(x) => print!("{:#02x}\n", x),
@@ -157,29 +142,28 @@ pub fn execute(
                 }
             }
             ops::Operator::Input => {
-                // let print_value = ctx.pop();
+                let print_value = ctx.pop();
 
-                // if let Some(ops::Value::Str(x)) = print_value {
-                //     print!("{}", ctx.str_heap[x])
-                // }
+                if let Some(ops::Value::Str(x)) = print_value {
+                    print!("{}", ctx.read_str(&ops::Value::Str(x)).unwrap())
+                }
 
-                // let mut s = String::new();
+                let mut s = String::new();
 
-                // let _ = stdout().flush();
-                // stdin()
-                //     .read_line(&mut s)
-                //     .expect("Did not enter a correct string");
-                // if let Some('\n') = s.chars().next_back() {
-                //     s.pop();
-                // }
-                // if let Some('\r') = s.chars().next_back() {
-                //     s.pop();
-                // }
+                let _ = stdout().flush();
+                stdin()
+                    .read_line(&mut s)
+                    .expect("Did not enter a correct string");
+                if let Some('\n') = s.chars().next_back() {
+                    s.pop();
+                }
+                if let Some('\r') = s.chars().next_back() {
+                    s.pop();
+                }
 
-                // let unescaped_x = unescape(&s).unwrap();
-                // ctx.str_heap.push(unescaped_x);
-                // let i = ctx.str_heap.len() - 1;
-                // ctx.push(ops::Value::Str(i));
+                let unescaped_x = crate::parse::parse_char(&s);
+                let res = ctx.write(&unescaped_x);
+                ctx.push(ops::Value::Str(res));
             }
             ops::Operator::Not => {
                 if ctx.stack.len() < 1 {
@@ -266,9 +250,12 @@ pub fn execute(
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Bool(x == y))
                     }
-                    // (ops::Value::Str(x), ops::Value::Str(y)) => {
-                    //     ctx.push(ops::Value::Bool(ctx.str_heap[x] == ctx.str_heap[y]))
-                    // }
+                    (ops::Value::Str(x), ops::Value::Str(y)) => {
+                        let s1 = ctx.read_str(&ops::Value::Str(x)).unwrap();
+                        let s2 = ctx.read_str(&ops::Value::Str(y)).unwrap();
+
+                        ctx.push(ops::Value::Bool(s1 == s2))
+                    }
                     (_, ops::Value::TypeLiteral(ops::TypeLiteral::Int)) => {
                         if let ops::Value::Int(_) = a {
                             ctx.push(ops::Value::Bool(true))
@@ -550,16 +537,16 @@ pub fn execute(
                                 ctx.push(ops::Value::Int(0i32))
                             }
                         }
-                        // ops::Value::Str(x) => {
-                        //     if let Ok(new_x) = ctx.str_heap[x].parse::<i32>() {
-                        //         ctx.push(ops::Value::Int(new_x));
-                        //     } else {
-                        //         return Err((
-                        //             "Fikk ikke til å omgjøre til Helt",
-                        //             token.pos.clone(),
-                        //         ));
-                        //     }
-                        // }
+                        ops::Value::Str(x) => {
+                            if let Ok(new_x) = ctx.read_str(&ops::Value::Str(x)).unwrap().parse::<i32>() {
+                                ctx.push(ops::Value::Int(new_x));
+                            } else {
+                                return Err((
+                                    "Fikk ikke til å omgjøre til Helt",
+                                    token.pos.clone(),
+                                ));
+                            }
+                        }
                         _ => {
                             let err_s: String =
                                 format!("Kunne ikke omgjøre {} til {}", b, typ).to_owned();
@@ -575,44 +562,44 @@ pub fn execute(
                                 ctx.push(ops::Value::Float(0.))
                             }
                         }
-                        // ops::Value::Str(x) => {
-                        //     if let Ok(new_x) = ctx.str_heap[x].parse::<f32>() {
-                        //         ctx.push(ops::Value::Float(new_x));
-                        //     } else {
-                        //         return Err((
-                        //             "Fikk ikke til å omgjøre til Flyt",
-                        //             token.pos.clone(),
-                        //         ));
-                        //     }
-                        // }
+                        ops::Value::Str(x) => {
+                            if let Ok(new_x) = ctx.read_str(&ops::Value::Str(x)).unwrap().parse::<f32>() {
+                                ctx.push(ops::Value::Float(new_x));
+                            } else {
+                                return Err((
+                                    "Fikk ikke til å omgjøre til Flyt",
+                                    token.pos.clone(),
+                                ));
+                            }
+                        }
                         _ => {
                             let err_s: String =
                                 format!("Kunne ikke omgjøre {} til {}", b, typ).to_owned();
                             return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
                         }
                     },
-                    // (ops::Value::TypeLiteral(ops::TypeLiteral::Str), _) => match b {
-                    //     ops::Value::Int(x) => {
-                    //         let new_x = x.to_string();
-                    //         ctx.str_heap.push(new_x);
-                    //         ctx.push(ops::Value::Str(ctx.str_heap.len() - 1))
-                    //     }
-                    //     ops::Value::Float(x) => {
-                    //         let new_x = x.to_string();
-                    //         ctx.str_heap.push(new_x);
-                    //         ctx.push(ops::Value::Str(ctx.str_heap.len() - 1))
-                    //     }
-                    //     ops::Value::Bool(x) => {
-                    //         let new_x = x.to_string();
-                    //         ctx.str_heap.push(new_x);
-                    //         ctx.push(ops::Value::Str(ctx.str_heap.len() - 1))
-                    //     }
-                    //     _ => {
-                    //         let err_s: String =
-                    //             format!("Kunne ikke omgjøre {} til {}", b, typ).to_owned();
-                    //         return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
-                    //     }
-                    // },
+                    (ops::Value::TypeLiteral(ops::TypeLiteral::Str), _) => match b {
+                        ops::Value::Int(x) => {
+                            let new_x = crate::parse::parse_char(&x.to_string());
+                            let res = ctx.write(&new_x);
+                            ctx.push(ops::Value::Str(res))
+                        }
+                        ops::Value::Float(x) => {
+                            let new_x = crate::parse::parse_char(&x.to_string());
+                            let res = ctx.write(&new_x);
+                            ctx.push(ops::Value::Str(res))
+                        }
+                        ops::Value::Bool(x) => {
+                            let new_x = crate::parse::parse_char(&x.to_string());
+                            let res = ctx.write(&new_x);
+                            ctx.push(ops::Value::Str(res))
+                        }
+                        _ => {
+                            let err_s: String =
+                                format!("Kunne ikke omgjøre {} til {}", b, typ).to_owned();
+                            return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        }
+                    },
                     (_, _) => {
                         let err_s: String = format!("Kunne ikke omgjøre {} til {}. Andre argument må være en bokstavelig type", b, typ).to_owned();
                         return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));

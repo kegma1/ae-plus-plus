@@ -125,44 +125,44 @@ pub fn parse(
                     )
                 }
             }
-            x if x.chars().nth(0) == Some('b') => {
-                if x.len() != 9 {
-                    return Err(("Kunne ikke oversette 'Byte'", pos));
-                }
+            // x if x.chars().nth(0) == Some('b') => {
+            //     if x.len() != 9 {
+            //         return Err(("Kunne ikke oversette 'Byte'", pos));
+            //     }
 
-                let mut byte = x.chars();
-                byte.next();
-                let res = u8::from_str_radix(byte.as_str(), 2);
-                if let Ok(u) = res {
-                    ops::Instruction::new(
-                        ops::Operator::Literal,
-                        Some(ops::Value::Byte(u)),
-                        None,
-                        pos,
-                    )
-                } else {
-                    return Err(("Kunne ikke oversette 'Byte'", pos));
-                }
-            }
-            x if x.chars().nth(0) == Some('x') => {
-                if x.len() != 3 {
-                    return Err(("Kunne ikke oversette 'Byte'", pos));
-                }
+            //     let mut byte = x.chars();
+            //     byte.next();
+            //     let res = u8::from_str_radix(byte.as_str(), 2);
+            //     if let Ok(u) = res {
+            //         ops::Instruction::new(
+            //             ops::Operator::Literal,
+            //             Some(ops::Value::Byte(u)),
+            //             None,
+            //             pos,
+            //         )
+            //     } else {
+            //         return Err(("Kunne ikke oversette 'Byte'", pos));
+            //     }
+            // }
+            // x if x.chars().nth(0) == Some('x') => {
+            //     if x.len() != 3 {
+            //         return Err(("Kunne ikke oversette 'Byte'", pos));
+            //     }
 
-                let mut byte = x.chars();
-                byte.next();
-                let res = u8::from_str_radix(byte.as_str(), 16);
-                if let Ok(u) = res {
-                    ops::Instruction::new(
-                        ops::Operator::Literal,
-                        Some(ops::Value::Byte(u)),
-                        None,
-                        pos,
-                    )
-                } else {
-                    return Err(("Kunne ikke oversette 'Byte'", pos));
-                }
-            }
+            //     let mut byte = x.chars();
+            //     byte.next();
+            //     let res = u8::from_str_radix(byte.as_str(), 16);
+            //     if let Ok(u) = res {
+            //         ops::Instruction::new(
+            //             ops::Operator::Literal,
+            //             Some(ops::Value::Byte(u)),
+            //             None,
+            //             pos,
+            //         )
+            //     } else {
+            //         return Err(("Kunne ikke oversette 'Byte'", pos));
+            //     }
+            // }
             "" => {
                 i += 1;
                 continue;
@@ -194,7 +194,7 @@ pub fn parse(
     Ok(parsed_prg)
 }
 
-fn parse_char(x: &str) -> Vec<ops::Value> {
+pub fn parse_char(x: &str) -> Vec<ops::Value> {
     let quoted = unescape(x).unwrap();
     let unescaped_x = quoted.chars();
     let mut res = vec![];

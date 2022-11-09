@@ -1,1 +1,2 @@
-"hallo, verden\n" skriv-ut
+"hva heter du? " spør
+"hallo " snu + skriv-ut

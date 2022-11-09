@@ -51,6 +51,23 @@ impl Runtime {
     pub fn read_data(&self, ptr: ops::Ptr, len: usize) -> Option<&[ops::Value]> {
         self.mem.get(ptr..(ptr + len))
     }
+
+    pub fn read_str(&self, str_ptr: &ops::Value) -> Option<String> {
+        if let ops::Value::Str((ptr, len)) = str_ptr {
+            Some(self
+        .read_data(*ptr, *len)
+        .unwrap()
+        .iter()
+        .map(|x| {
+            if let ops::Value::Char(c) = x {
+                c.clone()
+            } else {
+                '\0'
+            }
+        }).collect::<String>())
+    } else {
+        None
+    }}
 }
 
 fn main() {
