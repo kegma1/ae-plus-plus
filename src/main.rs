@@ -42,6 +42,10 @@ impl Runtime {
         (ptr, data.len())
     }
 
+    pub fn over_write(&mut self, ptr: ops::Ptr ,data: &ops::Value) {
+        self.mem[ptr] = data.clone()
+    }
+
     pub fn read(&self, ptr: ops::Ptr) -> Option<ops::Value> {
         self.mem.get(ptr).copied()
     }

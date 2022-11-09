@@ -81,6 +81,7 @@ pub type Ptr = usize;
 pub enum Operator {
     Literal, // Value
     Const,
+    Mem,
 
     Word,
 

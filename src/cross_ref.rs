@@ -11,6 +11,7 @@ pub fn cross_reference(
             ops::Operator::If => stack.push(i),
             ops::Operator::While => stack.push(i),
             ops::Operator::Const => stack.push(i),
+            ops::Operator::Mem => stack.push(i),
             ops::Operator::Else => {
                 let if_i = stack.pop().unwrap();
                 if prg[if_i].op == ops::Operator::If {
@@ -35,7 +36,10 @@ pub fn cross_reference(
                     prg[block_i].arg = Some(i);
                 } else if prg[block_i].op == ops::Operator::Const {
                     prg[i].arg = Some(block_i);
+                } else if prg[block_i].op == ops::Operator::Mem {
+                    prg[i].arg = Some(block_i);
                 }
+                
             }
             ops::Operator::Do => {
                 let while_i = stack.pop().unwrap();

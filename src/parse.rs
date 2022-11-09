@@ -48,6 +48,10 @@ pub fn parse(
                 state = Mode::Define;
                 ops::Instruction::new(ops::Operator::Const, None, None, pos)
             }
+            "minne" => {
+                state = Mode::Define;
+                ops::Instruction::new(ops::Operator::Mem, None, None, pos)
+            }
             "=" => ops::Instruction::new(ops::Operator::Eq, None, None, pos),
             ">" => ops::Instruction::new(ops::Operator::Gt, None, None, pos),
             ">=" => ops::Instruction::new(ops::Operator::Ge, None, None, pos),

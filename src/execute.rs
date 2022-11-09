@@ -428,6 +428,30 @@ pub fn execute(
                         } else {
                             return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));
                         }
+                    } else if let ops::Operator::Mem = prg[ptr].op {
+                        if ctx.stack.len() < 1 {
+                            return Err((
+                                "'minne' definisjon krever et element på toppen av stabelen",
+                                token.pos.clone(),
+                            ));
+                        }
+                        let val = ctx.pop().unwrap();
+                        let name = &prg[ptr + 1].name;
+
+                        if let Some(key) = name {
+                            if ctx.def[key] != None {
+                                let err_s: String = format!(
+                                    "'{}' kan ikke omdefineres ettersom den er konstant",
+                                    key
+                                )
+                                .to_owned();
+                                return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                            }
+                            let (ptr, _) = ctx.write(&vec![val]);
+                            ctx.def.insert(key.to_string(), Some(ops::Value::Ptr(ptr)));
+                        } else {
+                            return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));
+                        }
                     } else {
                         i = ptr;
                     }
@@ -459,7 +483,7 @@ pub fn execute(
                     return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
                 }
             }
-            ops::Operator::While | ops::Operator::Const => (),
+            ops::Operator::While | ops::Operator::Const | ops::Operator::Mem => (),
             ops::Operator::Dup => {
                 if ctx.stack.len() < 1 {
                     return Err(("'dup' operator krever minst 1 argument", token.pos.clone()));
@@ -482,7 +506,7 @@ pub fn execute(
             }
             ops::Operator::Swap => {
                 if ctx.stack.len() < 2 {
-                    return Err(("'snu' operator krever minst 1 argument", token.pos.clone()));
+                    return Err(("'snu' operator krever minst 2 argumenter", token.pos.clone()));
                 }
 
                 let b = ctx.pop().unwrap();
@@ -493,7 +517,7 @@ pub fn execute(
             }
             ops::Operator::Over => {
                 if ctx.stack.len() < 2 {
-                    return Err(("'over' operator krever minst 1 argument", token.pos.clone()));
+                    return Err(("'over' operator krever minst 2 argumenter", token.pos.clone()));
                 }
 
                 let b = ctx.pop().unwrap();
@@ -505,7 +529,7 @@ pub fn execute(
             }
             ops::Operator::Rot => {
                 if ctx.stack.len() < 3 {
-                    return Err(("'rot' operator krever minst 1 argument", token.pos.clone()));
+                    return Err(("'rot' operator krever minst 3 argumenter", token.pos.clone()));
                 }
 
                 let b = ctx.pop().unwrap();
@@ -519,7 +543,7 @@ pub fn execute(
             ops::Operator::Cast => {
                 if ctx.stack.len() < 2 {
                     return Err((
-                        "'omgjør' operator krever minst 1 argument",
+                        "'omgjør' operator krever minst 2 argumenter",
                         token.pos.clone(),
                     ));
                 }
@@ -606,8 +630,48 @@ pub fn execute(
                     }
                 }
             }
-            ops::Operator::Read => todo!(),
-            ops::Operator::Write => todo!(),
+            ops::Operator::Read => {
+                if ctx.stack.len() < 1 {
+                    return Err((
+                        "',' operator krever minst 1 argument",
+                        token.pos.clone(),
+                    ));
+                }
+
+                let ptr = ctx.pop().unwrap();
+
+                if let ops::Value::Ptr(x) = ptr {
+                    let val = ctx.read(x).unwrap();
+                    ctx.push(ptr);
+                    ctx.push(val)
+                } else {
+                    let err_s: String =
+                                format!("Kunne ikke lese fra minne adresse '{}'", ptr).to_owned();
+                    return Err((
+                        Box::leak(err_s.into_boxed_str()),
+                        token.pos.clone(),
+                    ));
+                }
+            },
+            ops::Operator::Write => {
+                if ctx.stack.len() < 2 {
+                    return Err((
+                        "'.' operator krever minst 2 argument",
+                        token.pos.clone(),
+                    ));
+                }
+                let val = ctx.pop().unwrap();
+                let ptr = ctx.pop().unwrap();
+
+                if let ops::Value::Ptr(x) = ptr {
+                    ctx.over_write(x, &val)
+                } else {
+                    return Err((
+                        "'.' operator krever at andre operator er en peker",
+                        token.pos.clone(),
+                    ));
+                }
+            },
             ops::Operator::Word => {
                 if let Some(key) = &token.name {
                     if let Some(val) = ctx.def[key] {
