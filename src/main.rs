@@ -12,7 +12,6 @@ pub struct Runtime {
     stack: Vec<ops::Value>,
     mem: Vec<ops::Value>,
     top: usize,
-    pub str_heap: Vec<String>,
     pub def: HashMap<String, Option<ops::Value>>,
 }
 
@@ -20,7 +19,6 @@ impl Runtime {
     pub fn new() -> Self {
         Runtime {
             stack: vec![],
-            str_heap: vec![],
             mem: vec![],
             top: 0,
             def: HashMap::new(),
@@ -91,8 +89,8 @@ fn main() {
                     println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
                 }
                 println!(
-                    "\nStabel: {:?}\nStrenger: {:?}\nDefinisjoner: {:?}\nMinne: {:?}",
-                    ctx.stack, ctx.str_heap, ctx.def, ctx.mem
+                    "\nStabel: {:?}\nMinne {:?}\nDefinisjoner: {:?}",
+                    ctx.stack, ctx.mem, ctx.def
                 )
             }
         }
