@@ -1,4 +1,11 @@
-minne x 35 slutt
-x , 34 + .
+"Skriv 1, 2 eller 3: " spør Helt omgjør
 
-x , skriv-ut
+dup 1 = hvis
+    skriv-ut
+ellers dup 2 = hvis
+    skriv-ut
+ellers dup 3 = hvis
+    skriv-ut
+ellers
+    "Jeg sa 1, 2 eller 3 >:(" skriv-ut
+slutt

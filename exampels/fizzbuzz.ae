@@ -5,7 +5,7 @@
         "fizz" 
     ellers dup 5 / slipp 0 = hvis
         "buzz" 
-    slutt slutt slutt
+    slutt
     
     dup Helt = hvis
         dup 

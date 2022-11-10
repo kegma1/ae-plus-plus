@@ -12,6 +12,7 @@ Programmeringsspråk på norsk
 - [x] Add type casting
 - [x] Add rest of stack operators
 - [x] Add constants
+- [x] Add Else-if
 - [ ] Add functions
 - [ ] Add import
 - [ ] Make better error system
