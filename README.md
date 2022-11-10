@@ -13,7 +13,7 @@ Programmeringsspråk på norsk
 - [x] Add rest of stack operators
 - [x] Add constants
 - [x] Add Else-if
-- [ ] Add functions
+- [x] Add functions
 - [ ] Add import
 - [ ] Make better error system
 

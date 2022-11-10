@@ -30,6 +30,7 @@ pub fn parse(
             "-" => ops::Instruction::new(ops::Operator::Sub, None, None, pos),
             "*" => ops::Instruction::new(ops::Operator::Mult, None, None, pos),
             "/" => ops::Instruction::new(ops::Operator::Div, None, None, pos),
+            "--" => ops::Instruction::new(ops::Operator::BikeShed, None, None, pos),
             "ikke" => ops::Instruction::new(ops::Operator::Not, None, None, pos),
             "og" => ops::Instruction::new(ops::Operator::And, None, None, pos),
             "eller" => ops::Instruction::new(ops::Operator::Or, None, None, pos),

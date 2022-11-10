@@ -101,6 +101,7 @@ pub enum Operator {
     Func,
 
     Word,
+    BikeShed,
 
     Add,
     Sub,

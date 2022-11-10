@@ -454,7 +454,24 @@ pub fn execute(
                             return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));
                         }
                     } else if let ops::Operator::Func = prg[ptr].op {
-                        ctx.retur();
+                        let ret_val = ctx.pop();
+                        let ret_typ = ctx.retur();
+                        match (ret_val, ret_typ) {
+                            (Some(val), Some(typ)) => {
+                                if val.eq(&typ) {
+                                    ctx.push(val)
+                                } else {
+                                    let err_s: String = format!(
+                                        "forvendtet '{:?}' men fant '{}'",
+                                        typ, val
+                                    )
+                                    .to_owned();
+                                    return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                                }
+                            },
+                            (None, Some(_)) => {return Err(("Fant ingen retur verdi", token.pos.clone()));},
+                            (_,_) => ()
+                        }
                         i = ctx.return_stack.pop().unwrap()
                     } else {
                         i = ptr;
@@ -706,12 +723,22 @@ pub fn execute(
             ops::Operator::In => {
                 let mut params: Vec<ops::TypeLiteral> = vec![];
                 let mut params_collected = false;
+                let mut ret_typ = None;
                 while !params_collected {
                     if let Some(ops::Value::TypeLiteral(_)) = ctx.peek() {
                         let ops::Value::TypeLiteral(typ) = ctx.pop().unwrap() else {
                             return Err(("Noet gikk galt med funksjons definisjonen", token.pos.clone()));
                         };
                         params.push(typ)
+                    } else if let Some(ops::Value::Null) = ctx.peek() {
+                        let _ = ctx.pop();
+                        match params.len() {
+                            0 => {return Err(("Fant ingen returnerings type", token.pos.clone()));},
+                            1 => {
+                                ret_typ = params.pop()
+                            }
+                            _ => {return Err(("Kan ikke returnere mer enn en verdi omgangen", token.pos.clone()));},
+                        }
                     } else {
                         params_collected = true
                     }
@@ -738,8 +765,11 @@ pub fn execute(
                         ));
                     }
                 }
-                ctx.swap(params_value)
+                ctx.swap(params_value, ret_typ)
             },
+            ops::Operator::BikeShed => {
+                ctx.push(ops::Value::Null)
+            }
         }
         // println!("{:?}", token.op);
         i += 1;

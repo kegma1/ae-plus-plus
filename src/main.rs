@@ -14,7 +14,7 @@ pub struct Runtime {
     top: usize,
     pub def: HashMap<String, Option<ops::Value>>,
     pub return_stack: Vec<usize>,
-    stack_stack: Vec<Vec<ops::Value>>
+    frame_stack: Vec<(Vec<ops::Value>, Option<ops::TypeLiteral>)>
 }
 
 impl Runtime {
@@ -25,7 +25,7 @@ impl Runtime {
             top: 0,
             def: HashMap::new(),
             return_stack: vec![],
-            stack_stack: vec![],
+            frame_stack: vec![],
         }
     }
 
@@ -44,14 +44,15 @@ impl Runtime {
         }
     }
 
-    pub fn swap(&mut self, new_stack: Vec<ops::Value>) {
-        self.stack_stack.push(self.stack.clone());
+    pub fn swap(&mut self, new_stack: Vec<ops::Value>, ret_typ: Option<ops::TypeLiteral>) {
+        self.frame_stack.push((self.stack.clone(), ret_typ));
         self.stack = new_stack
     }
 
-    pub fn retur(&mut self) {
-        let old_stack = self.stack_stack.pop().unwrap();
-        self.stack = old_stack
+    pub fn retur(&mut self) -> Option<ops::TypeLiteral> {
+        let (old_stack, ret_type) = self.frame_stack.pop().unwrap();
+        self.stack = old_stack;
+        ret_type
     }
 
     pub fn write(&mut self, data: &Vec<ops::Value>) -> (ops::Ptr, usize) {
