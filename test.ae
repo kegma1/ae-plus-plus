@@ -1,11 +1,11 @@
-"Skriv 1, 2 eller 3: " spør Helt omgjør
-
-dup 1 = hvis
-    skriv-ut
-ellers dup 2 = hvis
-    skriv-ut
-ellers dup 3 = hvis
-    skriv-ut
-ellers
-    "Jeg sa 1, 2 eller 3 >:(" skriv-ut
+funk si-hei Streng inni
+    "Hei " snu + skriv-ut
 slutt
+
+funk summer Helt Helt -- Helt inni
+    +
+slutt
+
+"kennet" si-hei
+
+35 34 summer skriv-ut

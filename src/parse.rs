@@ -36,6 +36,7 @@ pub fn parse(
             "ellers" => ops::Instruction::new(ops::Operator::Else, None, None, pos),
             "slutt" => ops::Instruction::new(ops::Operator::End, None, None, pos),
             "gjør" => ops::Instruction::new(ops::Operator::Do, None, None, pos),
+            "inni" => ops::Instruction::new(ops::Operator::In, None, None, pos),
             "når" => ops::Instruction::new(ops::Operator::While, None, None, pos),
             "dup" => ops::Instruction::new(ops::Operator::Dup, None, None, pos),
             "rot" => ops::Instruction::new(ops::Operator::Rot, None, None, pos),
@@ -51,6 +52,10 @@ pub fn parse(
             "minne" => {
                 state = Mode::Define;
                 ops::Instruction::new(ops::Operator::Mem, None, None, pos)
+            }
+            "funk" => {
+                state = Mode::Define;
+                ops::Instruction::new(ops::Operator::Funk, None, None, pos)
             }
             "=" => ops::Instruction::new(ops::Operator::Eq, None, None, pos),
             ">" => ops::Instruction::new(ops::Operator::Gt, None, None, pos),

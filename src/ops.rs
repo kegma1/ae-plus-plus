@@ -40,7 +40,6 @@ pub enum Value {
     Float(f32),
     Bool(bool),
     Str((Ptr, usize)), // Pointer to data in memory, size of string
-    // Str(Ptr),
     TypeLiteral(TypeLiteral),
     Ptr(Ptr), // ikke implementert
     Byte(u8), //ikke implementert
@@ -82,6 +81,7 @@ pub enum Operator {
     Literal, // Value
     Const,
     Mem,
+    Funk,
 
     Word,
 
@@ -95,8 +95,8 @@ pub enum Operator {
     Print,
     Input,
 
-    Read,  // not yet implemented
-    Write, // not yet implemented
+    Read,  
+    Write, 
     Exit,
 
     Not,
@@ -113,6 +113,7 @@ pub enum Operator {
     Else, // Option<Ptr>
     End,  // Option<Ptr>
     Do,   // Option<Ptr>
+    In,  //  Option<Ptr>
     While,
 
     Dup,
