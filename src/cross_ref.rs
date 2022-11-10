@@ -6,7 +6,6 @@ pub fn cross_reference(
 ) -> Result<Vec<ops::Instruction>, (&'static str, ops::Pos)> {
     let mut stack: Vec<usize> = vec![];
     for i in 0..prg.len() {
-        // println!("{:?}", stack);
         let token = prg[i].op.clone();
         match token {
             ops::Operator::If => stack.push(i),
@@ -34,7 +33,6 @@ pub fn cross_reference(
                     'else_loop :while j != -1 {
                         let pot_else = stack.pop().unwrap();
                         if prg[pot_else].op == ops::Operator::Else {
-                            // println!("{}", prg[pot_else]);
                             prg[pot_else].arg = Some(i);
                             j -= 1
                         } else {
