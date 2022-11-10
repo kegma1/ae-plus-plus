@@ -5,8 +5,8 @@ Programmeringsspråk på norsk
 - [x] Reworked runtime and execution
 - [x] rework strings and memory
 - [x] Add memory read and write
-- [ ] pointer menipulation
-- [ ] structurs
+- [ ] pointer manipulation
+- [ ] structure
 - [ ] Add string manipulation
 - [ ] f strings
 - [x] Add type casting
