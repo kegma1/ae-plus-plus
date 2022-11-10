@@ -40,11 +40,27 @@ pub enum Value {
     Float(f32),
     Bool(bool),
     Str((Ptr, usize)), // Pointer to data in memory, size of string
-    TypeLiteral(TypeLiteral),
-    Ptr(Ptr), // ikke implementert
     Byte(u8), //ikke implementert
     Char(char),
+    Ptr(Ptr), // ikke implementert
+
+    TypeLiteral(TypeLiteral),
+    FuncPtr(usize),
     Null,
+}
+
+impl Value {
+    pub fn eq(&self, typ: &TypeLiteral) -> bool {
+        match self {
+            Value::Int(_) => typ == &TypeLiteral::Int,
+            Value::Float(_) => typ == &TypeLiteral::Float,
+            Value::Bool(_) => typ == &TypeLiteral::Bool,
+            Value::Str(_) => typ == &TypeLiteral::Str,
+            Value::Byte(_) => typ == &TypeLiteral::Byte,
+            Value::Char(_) => typ == &TypeLiteral::Char,
+            _ => false
+        }
+    }
 }
 
 impl fmt::Display for Value {
@@ -59,6 +75,7 @@ impl fmt::Display for Value {
             Value::Byte(_) => write!(f, "Byte"),
             Value::Char(_) => write!(f, "Bokst"),
             Value::Null => write!(f, "Null"),
+            _ => write!(f, ""),
         }
     }
 }
@@ -81,7 +98,7 @@ pub enum Operator {
     Literal, // Value
     Const,
     Mem,
-    Funk,
+    Func,
 
     Word,
 

@@ -5,6 +5,7 @@ use snailquote::unescape;
 enum Mode {
     Normal,
     Define,
+    Function,
 }
 
 pub fn parse(
@@ -54,8 +55,8 @@ pub fn parse(
                 ops::Instruction::new(ops::Operator::Mem, None, None, pos)
             }
             "funk" => {
-                state = Mode::Define;
-                ops::Instruction::new(ops::Operator::Funk, None, None, pos)
+                state = Mode::Function;
+                ops::Instruction::new(ops::Operator::Func, None, None, pos)
             }
             "=" => ops::Instruction::new(ops::Operator::Eq, None, None, pos),
             ">" => ops::Instruction::new(ops::Operator::Gt, None, None, pos),
@@ -190,6 +191,11 @@ pub fn parse(
                     state = Mode::Normal;
                     ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
                 }
+                Mode::Function => {
+                    ctx.def.insert(token.clone(), Some(ops::Value::FuncPtr(i)));
+                    state = Mode::Normal;
+                    ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
+                },
             },
         });
 

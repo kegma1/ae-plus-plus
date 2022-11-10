@@ -1,11 +1,12 @@
-funk si-hei Streng inni
+funk si-hei Str inni
     "Hei " snu + skriv-ut
 slutt
 
-funk summer Helt Helt -- Helt inni
-    +
-slutt
+# funk summer Helt Helt -- Helt inni
+#     +
+# slutt
+"kennet"
+dup si-hei
 
-"kennet" si-hei
 
-35 34 summer skriv-ut
+# 35 34 summer skriv-ut

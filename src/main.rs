@@ -13,6 +13,8 @@ pub struct Runtime {
     mem: Vec<ops::Value>,
     top: usize,
     pub def: HashMap<String, Option<ops::Value>>,
+    pub return_stack: Vec<usize>,
+    stack_stack: Vec<Vec<ops::Value>>
 }
 
 impl Runtime {
@@ -22,6 +24,8 @@ impl Runtime {
             mem: vec![],
             top: 0,
             def: HashMap::new(),
+            return_stack: vec![],
+            stack_stack: vec![],
         }
     }
 
@@ -31,6 +35,23 @@ impl Runtime {
 
     pub fn pop(&mut self) -> Option<ops::Value> {
         self.stack.pop()
+    }
+
+    pub fn peek(&mut self) -> Option<&ops::Value> {
+        match self.stack.len() {
+            0 => None,
+            n => Some(&self.stack[n - 1]),
+        }
+    }
+
+    pub fn swap(&mut self, new_stack: Vec<ops::Value>) {
+        self.stack_stack.push(self.stack.clone());
+        self.stack = new_stack
+    }
+
+    pub fn retur(&mut self) {
+        let old_stack = self.stack_stack.pop().unwrap();
+        self.stack = old_stack
     }
 
     pub fn write(&mut self, data: &Vec<ops::Value>) -> (ops::Ptr, usize) {
@@ -93,8 +114,8 @@ fn main() {
                     println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
                 }
                 println!(
-                    "\nStabel: {:?}\nMinne {:?}\nDefinisjoner: {:?}",
-                    ctx.stack, ctx.mem, ctx.def
+                    "\nStabel: {:?}\nMinne {:?}\nDefinisjoner: {:?}\nReturner_stabel: {:?}",
+                    ctx.stack, ctx.mem, ctx.def, ctx.return_stack
                 )
             }
         }

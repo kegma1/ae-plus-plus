@@ -139,6 +139,7 @@ pub fn execute(
                     ops::Value::Byte(x) => print!("{:#02x}\n", x),
                     ops::Value::Char(x) => print!("{}\n", x),
                     ops::Value::Null => todo!(),
+                    ops::Value::FuncPtr(_) => todo!(),
                 }
             }
             ops::Operator::Input => {
@@ -452,6 +453,9 @@ pub fn execute(
                         } else {
                             return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));
                         }
+                    } else if let ops::Operator::Func = prg[ptr].op {
+                        ctx.retur();
+                        i = ctx.return_stack.pop().unwrap()
                     } else {
                         i = ptr;
                     }
@@ -642,7 +646,6 @@ pub fn execute(
 
                 if let ops::Value::Ptr(x) = ptr {
                     let val = ctx.read(x).unwrap();
-                    ctx.push(ptr);
                     ctx.push(val)
                 } else {
                     let err_s: String =
@@ -674,7 +677,10 @@ pub fn execute(
             },
             ops::Operator::Word => {
                 if let Some(key) = &token.name {
-                    if let Some(val) = ctx.def[key] {
+                    if let Some(ops::Value::FuncPtr(func_ptr)) = ctx.def[key] {
+                        ctx.return_stack.push(i);
+                        i = func_ptr
+                    } else if let Some(val) = ctx.def[key] {
                         ctx.push(val)
                     }
                 }
@@ -694,6 +700,46 @@ pub fn execute(
                     return Err(("Avslutnings kode må være ett 'Helt'", token.pos.clone()));
                 }
             }
+            ops::Operator::Func => {
+                i = token.arg.unwrap();
+            },
+            ops::Operator::In => {
+                let mut params: Vec<ops::TypeLiteral> = vec![];
+                let mut params_collected = false;
+                while !params_collected {
+                    if let Some(ops::Value::TypeLiteral(_)) = ctx.peek() {
+                        let ops::Value::TypeLiteral(typ) = ctx.pop().unwrap() else {
+                            return Err(("Noet gikk galt med funksjons definisjonen", token.pos.clone()));
+                        };
+                        params.push(typ)
+                    } else {
+                        params_collected = true
+                    }
+                }
+
+                let mut params_value: Vec<ops::Value> = vec![];
+                for typ in params {
+                    let stack_val = ctx.pop();
+                    if let Some(val) = stack_val {
+                        if val.eq(&typ) {
+                            params_value.push(val)
+                        } else {
+                            let err_s: String =
+                                format!("Forventet '{:?}' men fant '{}'", typ, val).to_owned();
+                            return Err((
+                                Box::leak(err_s.into_boxed_str()),
+                                token.pos.clone(),
+                            ));
+                        }
+                    } else {
+                        return Err((
+                            "Fant ikke nokk argumenter for funksjon",
+                            token.pos.clone(),
+                        ));
+                    }
+                }
+                ctx.swap(params_value)
+            },
         }
         // println!("{:?}", token.op);
         i += 1;
