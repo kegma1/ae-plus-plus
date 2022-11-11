@@ -193,7 +193,7 @@ pub fn parse(
                     ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
                 }
                 Mode::Function => {
-                    ctx.def.insert(token.clone(), Some(ops::Value::FuncPtr(i)));
+                    ctx.def.insert(token.clone(), None);
                     state = Mode::Normal;
                     ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
                 },

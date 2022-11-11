@@ -718,6 +718,13 @@ pub fn execute(
                 }
             }
             ops::Operator::Func => {
+                let word_i = i + 1;
+                let word_opt = &prg[word_i].name;
+                if let Some(word) = word_opt {
+                    ctx.def.insert(word.clone(), Some(ops::Value::FuncPtr(word_i)));
+                } else {
+                    return Err(("Kunne ikke finne funksjons navn", token.pos.clone()));
+                }
                 i = token.arg.unwrap();
             },
             ops::Operator::In => {
