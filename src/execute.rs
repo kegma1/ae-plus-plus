@@ -772,6 +772,7 @@ pub fn execute(
                         ));
                     }
                 }
+                params_value.reverse();
                 ctx.swap(params_value, ret_typ)
             },
             ops::Operator::BikeShed => {
