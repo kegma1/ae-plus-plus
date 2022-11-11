@@ -42,7 +42,7 @@ pub enum Value {
     Str((Ptr, usize)), // Pointer to data in memory, size of string
     Byte(u8), //ikke implementert
     Char(char),
-    Ptr(Ptr), // ikke implementert
+    Ptr((Ptr, usize, TypeLiteral)), // ikke implementert
 
     TypeLiteral(TypeLiteral),
     FuncPtr(usize),
@@ -58,6 +58,7 @@ impl Value {
             Value::Str(_) => typ == &TypeLiteral::Str,
             Value::Byte(_) => typ == &TypeLiteral::Byte,
             Value::Char(_) => typ == &TypeLiteral::Char,
+            Value::Ptr(_) => typ == &TypeLiteral::Ptr,
             _ => false
         }
     }
@@ -88,6 +89,7 @@ pub enum TypeLiteral {
     Str,
     Byte,
     Char,
+    Ptr,
 }
 
 pub type Pos = (usize, usize, String);
@@ -141,3 +143,25 @@ pub enum Operator {
     Rot,
     // Null
 }
+
+// skal gjøre pekere bedre senere.
+// #[warn(dead_code)]
+// struct Pointer {
+//     pub ptr: usize,
+//     pub len: usize,
+//     pub typ: TypeLiteral,
+//     max_ptr: usize,
+//     min_ptr: usize
+// }
+// #[warn(dead_code)]
+// impl Pointer {
+//     fn new(ptr: usize, len: usize, typ: TypeLiteral,) -> Self {
+//         Pointer {
+//             ptr,
+//             len,
+//             typ,
+//             min_ptr: ptr,
+//             max_ptr: ptr + len
+//         }
+//     }
+// }

@@ -91,6 +91,12 @@ pub fn parse(
                 None,
                 pos,
             ),
+            "Peker" => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Value::TypeLiteral(ops::TypeLiteral::Ptr)),
+                None,
+                pos,
+            ),
             "Sann" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::Bool(true)),

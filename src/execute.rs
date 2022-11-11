@@ -25,6 +25,7 @@ pub fn execute(
                 match (a, b) {
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x + y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x + y)),
+                    (ops::Value::Ptr(x), ops::Value::Int(y)) => ctx.push(ops::Value::Ptr((x.0 + y as usize, x.1, x.2))),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Float(x + y))
                     }
@@ -57,6 +58,7 @@ pub fn execute(
                 match (a, b) {
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x - y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x - y)),
+                    (ops::Value::Ptr(x), ops::Value::Int(y)) => ctx.push(ops::Value::Ptr((x.0 - y as usize, x.1, x.2))),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Float(x - y))
                     }
@@ -133,9 +135,9 @@ pub fn execute(
                     ops::Value::Int(x) => print!("{}\n", x),
                     ops::Value::Float(x) => print!("{}\n", x),
                     ops::Value::Bool(x) => print!("{}\n", if x { "Sann" } else { "Usann" }),
-                    ops::Value::Str(_) => print!("{}\n", ctx.read_str(&print_val).unwrap()),
+                    ops::Value::Str(_) => print!("{}", ctx.read_str(&print_val).unwrap()),
                     ops::Value::TypeLiteral(_) => todo!("print for TypeLiter is not implemented"),
-                    ops::Value::Ptr(_) => todo!("print for Pointer is not implemented"),
+                    ops::Value::Ptr(x) => print!("{:?}", x),
                     ops::Value::Byte(x) => print!("{:#02x}\n", x),
                     ops::Value::Char(x) => print!("{}\n", x),
                     ops::Value::Null => todo!(),
@@ -430,14 +432,34 @@ pub fn execute(
                             return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));
                         }
                     } else if let ops::Operator::Mem = prg[ptr].op {
-                        if ctx.stack.len() < 1 {
+                        if ctx.stack.len() < 2 {
                             return Err((
-                                "'minne' definisjon krever et element på toppen av stabelen",
+                                "'minne' definisjon krever en type og en lengde på toppen av stabelenm",
                                 token.pos.clone(),
                             ));
                         }
-                        let val = ctx.pop().unwrap();
+
+                        let ops::Value::Int(len) = ctx.pop().unwrap() else {
+                            return Err((
+                                "Verdien på toppen av stabelen må være et positivt heltall",
+                                token.pos.clone(),
+                            ));
+                        };
+                        if len <= 0 {
+                            return Err((
+                                "Verdien på toppen av stabelen må være et positivt heltall og kan ikke vær null eller mindre",
+                                token.pos.clone(),
+                            ));
+                        }
+                        let ops::Value::TypeLiteral(typ) = ctx.pop().unwrap() else {
+                            return Err((
+                                "Verdien på toppen av stabelen må være en type",
+                                token.pos.clone(),
+                            ));
+                        };
                         let name = &prg[ptr + 1].name;
+
+
 
                         if let Some(key) = name {
                             if ctx.def[key] != None {
@@ -448,8 +470,10 @@ pub fn execute(
                                 .to_owned();
                                 return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
                             }
-                            let (ptr, _) = ctx.write(&vec![val]);
-                            ctx.def.insert(key.to_string(), Some(ops::Value::Ptr(ptr)));
+
+                            let res = ctx.write(&vec![ops::Value::Null; len as usize]);
+                            let result = (res.0, res.1, typ);
+                            ctx.def.insert(key.to_string(), Some(ops::Value::Ptr(result)));
                         } else {
                             return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));
                         }
@@ -645,10 +669,22 @@ pub fn execute(
                             return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
                         }
                     },
+                    (ops::Value::TypeLiteral(ops::TypeLiteral::Ptr), _) => match b {
+                        ops::Value::Str(x) => {
+                            let new_x = (x.0, x.1, ops::TypeLiteral::Char);
+                            ctx.push(ops::Value::Ptr(new_x))
+                        }
+                        _ => {
+                            let err_s: String =
+                                format!("Kunne ikke omgjøre {} til {}", b, typ).to_owned();
+                            return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        }
+                    },
                     (_, _) => {
                         let err_s: String = format!("Kunne ikke omgjøre {} til {}. Andre argument må være en bokstavelig type", b, typ).to_owned();
                         return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
                     }
+                    
                 }
             }
             ops::Operator::Read => {
@@ -662,7 +698,7 @@ pub fn execute(
                 let ptr = ctx.pop().unwrap();
 
                 if let ops::Value::Ptr(x) = ptr {
-                    let val = ctx.read(x).unwrap();
+                    let val = ctx.read(x.0).unwrap();
                     ctx.push(val)
                 } else {
                     let err_s: String =
@@ -684,7 +720,15 @@ pub fn execute(
                 let ptr = ctx.pop().unwrap();
 
                 if let ops::Value::Ptr(x) = ptr {
-                    ctx.over_write(x, &val)
+                    if !val.eq(&x.2) {
+                        let err_s: String =
+                                format!("Forvendtet {:?} men fant {}", x.2, val).to_owned();
+                    return Err((
+                        Box::leak(err_s.into_boxed_str()),
+                        token.pos.clone(),
+                    ));
+                    }
+                    ctx.over_write(x.0, &val)
                 } else {
                     return Err((
                         "'.' operator krever at andre operator er en peker",
