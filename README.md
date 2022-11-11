@@ -5,17 +5,18 @@ Programmeringsspråk på norsk
 - [x] Reworked runtime and execution
 - [x] rework strings and memory
 - [x] Add memory read and write
-- [ ] pointer manipulation
-- [ ] structure
-- [ ] Add string manipulation
-- [ ] f strings
+- [x] Add string manipulation
+- [x] pointer manipulation
 - [x] Add type casting
 - [x] Add rest of stack operators
 - [x] Add constants
 - [x] Add Else-if
 - [x] Add functions
+- [ ] make printing better
+- [ ] structure
 - [ ] Add import
 - [ ] Make better error system
+- [ ] Make better docs
 
 # Hvordan bruke
 ## Windows
