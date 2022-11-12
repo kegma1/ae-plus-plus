@@ -13,6 +13,7 @@ pub fn cross_reference(
             ops::Operator::Const => stack.push(i),
             ops::Operator::Mem => stack.push(i),
             ops::Operator::Func => stack.push(i),
+            ops::Operator::Let => stack.push(i),
             ops::Operator::Else => {
                 let if_i = stack.pop().unwrap();
                 if prg[if_i].op == ops::Operator::If {
@@ -31,7 +32,7 @@ pub fn cross_reference(
                 if prg[block_i].op == ops::Operator::If || prg[block_i].op == ops::Operator::Else {
                     prg[block_i].arg = Some(i);
                     let mut j: isize = stack.len() as isize - 1;
-                    'else_loop :while j != -1 {
+                    'else_loop: while j != -1 {
                         let pot_else = stack.pop().unwrap();
                         if prg[pot_else].op == ops::Operator::Else {
                             prg[pot_else].arg = Some(i);
@@ -51,13 +52,18 @@ pub fn cross_reference(
                 } else if prg[block_i].op == ops::Operator::Func {
                     prg[i].arg = Some(block_i);
                     prg[block_i].arg = Some(i);
+                } else if prg[block_i].op == ops::Operator::Let {
                 }
-                
             }
             ops::Operator::Do => {
                 let while_i = stack.pop().unwrap();
                 prg[i].arg = Some(while_i);
                 stack.push(i)
+            }
+            ops::Operator::In => {
+                let param_i = stack.pop().unwrap();
+                prg[i].arg = Some(param_i);
+                stack.push(param_i)
             }
             _ => (),
         }

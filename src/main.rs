@@ -14,7 +14,7 @@ pub struct Runtime {
     top: usize,
     pub def: HashMap<String, Option<ops::Value>>,
     pub return_stack: Vec<usize>,
-    frame_stack: Vec<(Vec<ops::Value>, Option<ops::TypeLiteral>)>
+    frame_stack: Vec<(Vec<ops::Value>, Option<ops::TypeLiteral>)>,
 }
 
 impl Runtime {
@@ -64,7 +64,7 @@ impl Runtime {
         (ptr, data.len())
     }
 
-    pub fn over_write(&mut self, ptr: ops::Ptr ,data: &ops::Value) {
+    pub fn over_write(&mut self, ptr: ops::Ptr, data: &ops::Value) {
         self.mem[ptr] = data.clone()
     }
 
@@ -78,20 +78,23 @@ impl Runtime {
 
     pub fn read_str(&self, str_ptr: &ops::Value) -> Option<String> {
         if let ops::Value::Str((ptr, len)) = str_ptr {
-            Some(self
-        .read_data(*ptr, *len)
-        .unwrap()
-        .iter()
-        .map(|x| {
-            if let ops::Value::Char(c) = x {
-                c.clone()
-            } else {
-                '\0'
-            }
-        }).collect::<String>())
-    } else {
-        None
-    }}
+            Some(
+                self.read_data(*ptr, *len)
+                    .unwrap()
+                    .iter()
+                    .map(|x| {
+                        if let ops::Value::Char(c) = x {
+                            c.clone()
+                        } else {
+                            '\0'
+                        }
+                    })
+                    .collect::<String>(),
+            )
+        } else {
+            None
+        }
+    }
 }
 
 fn main() {

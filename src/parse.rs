@@ -6,6 +6,7 @@ enum Mode {
     Normal,
     Define,
     Function,
+    Let,
 }
 
 pub fn parse(
@@ -38,7 +39,12 @@ pub fn parse(
             "ellers" => ops::Instruction::new(ops::Operator::Else, None, None, pos),
             "slutt" => ops::Instruction::new(ops::Operator::End, None, None, pos),
             "gjør" => ops::Instruction::new(ops::Operator::Do, None, None, pos),
-            "inni" => ops::Instruction::new(ops::Operator::In, None, None, pos),
+            "inni" => {
+                if let Mode::Let = state {
+                    state = Mode::Normal
+                }
+                ops::Instruction::new(ops::Operator::In, None, None, pos)
+            }
             "når" => ops::Instruction::new(ops::Operator::While, None, None, pos),
             "dup" => ops::Instruction::new(ops::Operator::Dup, None, None, pos),
             "rot" => ops::Instruction::new(ops::Operator::Rot, None, None, pos),
@@ -58,6 +64,10 @@ pub fn parse(
             "funk" => {
                 state = Mode::Function;
                 ops::Instruction::new(ops::Operator::Func, None, None, pos)
+            }
+            "let" => {
+                state = Mode::Let;
+                ops::Instruction::new(ops::Operator::Let, None, None, pos)
             }
             "=" => ops::Instruction::new(ops::Operator::Eq, None, None, pos),
             ">" => ops::Instruction::new(ops::Operator::Gt, None, None, pos),
@@ -202,7 +212,11 @@ pub fn parse(
                     ctx.def.insert(token.clone(), None);
                     state = Mode::Normal;
                     ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
-                },
+                }
+                Mode::Let => {
+                    ctx.def.insert(token.clone(), None);
+                    ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
+                }
             },
         });
 

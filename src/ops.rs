@@ -40,7 +40,7 @@ pub enum Value {
     Float(f32),
     Bool(bool),
     Str((Ptr, usize)), // Pointer to data in memory, size of string
-    Byte(u8), //ikke implementert
+    Byte(u8),          //ikke implementert
     Char(char),
     Ptr((Ptr, usize, TypeLiteral)), // ikke implementert
 
@@ -59,7 +59,7 @@ impl Value {
             Value::Byte(_) => typ == &TypeLiteral::Byte,
             Value::Char(_) => typ == &TypeLiteral::Char,
             Value::Ptr(_) => typ == &TypeLiteral::Ptr,
-            _ => false
+            _ => false,
         }
     }
 }
@@ -101,6 +101,7 @@ pub enum Operator {
     Const,
     Mem,
     Func,
+    Let,
 
     Word,
     BikeShed,
@@ -115,8 +116,8 @@ pub enum Operator {
     Print,
     Input,
 
-    Read,  
-    Write, 
+    Read,
+    Write,
     Exit,
 
     Not,
@@ -133,7 +134,7 @@ pub enum Operator {
     Else, // Option<Ptr>
     End,  // Option<Ptr>
     Do,   // Option<Ptr>
-    In,  //  Option<Ptr>
+    In,   //  Option<Ptr>
     While,
 
     Dup,
