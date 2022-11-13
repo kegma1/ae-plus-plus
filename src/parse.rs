@@ -83,6 +83,12 @@ pub fn parse(
                 None,
                 pos,
             ),
+            "Bool" => ops::Instruction::new(
+                ops::Operator::Literal,
+                Some(ops::Value::TypeLiteral(ops::TypeLiteral::Bool)),
+                None,
+                pos,
+            ),
             "Flyt" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Float)),
@@ -107,13 +113,13 @@ pub fn parse(
                 None,
                 pos,
             ),
-            "Sann" => ops::Instruction::new(
+            "sann" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::Bool(true)),
                 None,
                 pos,
             ),
-            "Usann" => ops::Instruction::new(
+            "usann" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::Bool(false)),
                 None,
