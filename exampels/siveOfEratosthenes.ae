@@ -20,7 +20,7 @@ når p , p , * limit <= gjør
         slutt
         p dup , 1 + .
     slutt
-slutt slipp
+slutt
 
 2 når dup limit 1 + < gjør
     prime over + , hvis

@@ -101,18 +101,25 @@ impl Runtime {
 
 impl fmt::Display for Runtime {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let width = termsize::get().unwrap().cols.into();
+
         write!(f, "Stabel: ")?;
+        let mut stack = String::from("");
         for v in &self.stack {
-            write!(f, "{}, ", v.to_string(&self))?;
+            stack.push_str(&format!("{}, ", v.to_string(self)));
         }
-        write!(f,"\n")?;
+
+        if (stack.len() + 8) <= width {
+            write!(f, "{}\n", stack)?;
+        } else {
+            write!(f, "...{}\n", &stack[(stack.len() - (width - 11))..(stack.len() - 1)])?;
+        }
 
         write!(f, "Minne: ")?;
         let mut mem = String::from("");
         for v in &self.mem {
             mem.push_str(&format!("{}, ", v.to_string(self)))
         }
-        let width = termsize::get().unwrap().cols.into();
         if (mem.len() + 7) <= width {
             write!(f, "{}\n", mem)?;
         } else {
