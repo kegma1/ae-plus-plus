@@ -177,7 +177,7 @@ pub enum Operator {
 
 // skal gjøre pekere bedre senere.
 // #[warn(dead_code)]
-// struct Pointer {
+// pub struct Pointer {
 //     pub ptr: usize,
 //     pub len: usize,
 //     pub typ: TypeLiteral,
@@ -186,7 +186,7 @@ pub enum Operator {
 // }
 // #[warn(dead_code)]
 // impl Pointer {
-//     fn new(ptr: usize, len: usize, typ: TypeLiteral,) -> Self {
+//     pub fn new(ptr: usize, len: usize, typ: TypeLiteral,) -> Self {
 //         Pointer {
 //             ptr,
 //             len,
@@ -194,5 +194,23 @@ pub enum Operator {
 //             min_ptr: ptr,
 //             max_ptr: ptr + len
 //         }
+//     }
+
+//     pub fn inc(&mut self, offset:usize) -> Option<&mut Self> {
+//         let new_ptr = self.ptr + offset;
+//         if new_ptr > self.max_ptr {
+//             return None;
+//         }
+//         self.ptr = new_ptr;
+//         Some(self)
+//     }
+
+//     pub fn dec(&mut self, offset:usize) -> Option<&mut Self> {
+//         let new_ptr = self.ptr - offset;
+//         if new_ptr < self.min_ptr {
+//             return None;
+//         }
+//         self.ptr = new_ptr;
+//         Some(self)
 //     }
 // }

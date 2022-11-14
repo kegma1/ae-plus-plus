@@ -156,8 +156,8 @@ pub fn execute(
             ops::Operator::Input => {
                 let print_value = ctx.pop();
 
-                if let Some(ops::Value::Str(x)) = print_value {
-                    print!("{}", ctx.read_str(&ops::Value::Str(x)).unwrap())
+                if let Some(x) = print_value {
+                    print!("{}", x.to_string(ctx))
                 }
 
                 let mut s = String::new();
