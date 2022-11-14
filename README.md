@@ -12,7 +12,11 @@ Programmeringsspråk på norsk
 - [x] Add constants
 - [x] Add Else-if
 - [x] Add functions
-- [ ] make printing better
+- [x] make printing better
+- [ ] drop memory
+- [ ] scoping
+- [ ] implement pointer struct for memory safety
+- [ ] auto read write for memory with only one element
 - [ ] structure
 - [ ] Add import
 - [ ] Make better error system
@@ -112,14 +116,14 @@ I Æ++ vill nesten alt av operasjoner fungere på top elementene på stabelen. U
 ```
   "69"   Int omgjør
 # ^verdi ^type
-skriv-ut # vil skrive ut 69 som et Int
+skriv # vil skrive ut 69 som et Int
 ```
 #
 ### konst nøkkelord
 ```
 konst x 35 34 + slutt
 
-x skriv-ut # dette vil skrive ut 69
+x skriv # dette vil skrive ut 69
 ```
 #
 ### minne nøkkelord
@@ -131,7 +135,7 @@ minne x Helt 3 slutt
 x 1 .
 x 1 + 2 .
 x 2 + 3 .
-x 1 + , skriv-ut # skriver ut 2
+x 1 + , skriv # skriver ut 2
 
 # minnet vil se ut som: |1|2|3| | | | |...
 #
@@ -143,13 +147,13 @@ x 1 + , skriv-ut # skriver ut 2
 ellers
     "mindre enn 10"
 slutt
-skriv-ut
+skriv
 ``` 
 #
 ### når løkker
 ```
 0 når dup 15 <= gjør
-    dup skriv-ut
+    dup skriv
     1 +
 slutt
 # skriver ut alle tallene fra 0 til 15
@@ -162,7 +166,7 @@ let x y z inni
     x z +
     y -
 slutt
-skriv-ut # skriver ut 2
+skriv # skriver ut 2
 ```
 #
 ### funksjoner
@@ -173,7 +177,7 @@ Når funksjonen blir utført vil du bare ha tilgang til de verdiene som ble gitt
 funk sum Helt Helt -- Helt inni
     x
 slutt
-2 2 sum skriv-ut # skriver-ut 4
+2 2 sum skriv # skriver-ut 4
 ```
 #
 ## Streng manipulasjon
@@ -186,5 +190,5 @@ dup "r" . 1 +
 dup "d" . 1 +
 dup "i" . 1 +
 5 - Str omgjør 
-skriv-ut # skriver ut mordi
+skriv # skriver ut mordi
 ```

@@ -1,9 +1,9 @@
 "Skriv enten 1 eller 0: " spør Helt omgjør
 
 0 = hvis
-    0 skriv-ut
+    0 skriv
 ellers
     når Sann gjør
-        1 skriv-ut
+        1 skriv
     slutt
 slutt

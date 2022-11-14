@@ -1,14 +1,14 @@
 konst x 34 35 + slutt
 konst y 351 slutt
 
-x skriv-ut
-y x + skriv-ut
+x skriv
+y x + skriv
 
 konst navn 
     "hva heter du? " spør 
 slutt
 
-"hei " navn + skriv-ut
+"hei " navn + skriv
 
 0 når dup 5 <= gjør
     konst z dup + 1 slutt

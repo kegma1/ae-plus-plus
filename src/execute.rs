@@ -134,25 +134,24 @@ pub fn execute(
             ops::Operator::Print => {
                 if ctx.stack.len() < 1 {
                     return Err((
-                        "'skriv-ut' operator krever minst 1 argument",
+                        "'skriv' operator krever minst 1 argument",
                         token.pos.clone(),
                     ));
                 }
 
                 let print_val = ctx.pop().unwrap();
-                let _ = stdout().flush();
-                match print_val {
-                    ops::Value::Int(x) => print!("{}\n", x),
-                    ops::Value::Float(x) => print!("{}\n", x),
-                    ops::Value::Bool(x) => print!("{}\n", if x { "Sann" } else { "Usann" }),
-                    ops::Value::Str(_) => print!("{}", ctx.read_str(&print_val).unwrap()),
-                    ops::Value::TypeLiteral(_) => todo!("print for TypeLiter is not implemented"),
-                    ops::Value::Ptr(x) => print!("{:?}", x),
-                    ops::Value::Byte(x) => print!("{:#02x}\n", x),
-                    ops::Value::Char(x) => print!("{}\n", x),
-                    ops::Value::Null => todo!(),
-                    ops::Value::FuncPtr(_) => todo!(),
+                print!("{}", print_val.to_string(ctx))
+            }
+            ops::Operator::PrintLn => {
+                if ctx.stack.len() < 1 {
+                    return Err((
+                        "'skrivnl' operator krever minst 1 argument",
+                        token.pos.clone(),
+                    ));
                 }
+
+                let print_val = ctx.pop().unwrap();
+                print!("{}\n", print_val.to_string(ctx))
             }
             ops::Operator::Input => {
                 let print_value = ctx.pop();

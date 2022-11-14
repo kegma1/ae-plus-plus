@@ -11,7 +11,7 @@
         dup 
     slutt
 
-    skriv-ut
+    skriv
 
     1 +
 slutt

@@ -1,4 +1,4 @@
 0 når dup 15 <= gjør
-    dup skriv-ut
+    dup skriv
     1 +
 slutt

@@ -27,5 +27,5 @@ inni
     Str omgjør
 slutt
 
-navn skriv-ut
-"e" "!" navn bytt_ut skriv-ut
+navn skriv
+"e" "!" navn bytt_ut skriv

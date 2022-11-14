@@ -62,6 +62,21 @@ impl Value {
             _ => false,
         }
     }
+
+    pub fn to_string(&self, ctx:& crate::Runtime) -> String {
+        match self {
+            Value::Int(x) => x.to_string(),
+            Value::Float(x) => x.to_string(),
+            Value::Bool(x) => if *x {String::from("sann")} else {String::from("usann")},
+            Value::Str(_) => ctx.read_str(self).unwrap(),
+            Value::Byte(x) => String::from(format!("{:#02x}", x)),
+            Value::Char(x) => x.to_string(),
+            Value::Ptr((ptr, len, typ)) => String::from(format!("[{}; {}] -> {}", typ, len, ptr)),
+            Value::TypeLiteral(x) => String::from(format!("{}", x)),
+            Value::Null => String::from("null"),
+            _ => String::from("Kan ikke skrives"),
+        }
+    }
 }
 
 impl fmt::Display for Value {
@@ -92,6 +107,20 @@ pub enum TypeLiteral {
     Ptr,
 }
 
+impl fmt::Display for TypeLiteral {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            TypeLiteral::Int => write!(f, "Helt"),
+            TypeLiteral::Float => write!(f, "Flyt"),
+            TypeLiteral::Bool => write!(f, "Bool"),
+            TypeLiteral::Str => write!(f, "Str"),
+            TypeLiteral::Ptr => write!(f, "Peker"),
+            TypeLiteral::Byte => write!(f, "Byte"),
+            TypeLiteral::Char => write!(f, "Bokst"),
+        }
+    }
+}
+
 pub type Pos = (usize, usize, String);
 pub type Ptr = usize;
 
@@ -114,6 +143,7 @@ pub enum Operator {
     Cast,
 
     Print,
+    PrintLn,
     Input,
 
     Read,

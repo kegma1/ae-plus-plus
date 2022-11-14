@@ -25,7 +25,8 @@ pub fn parse(
         let (token, pos) = unwraped_prg[i].clone();
         // println!("{}", i);
         parsed_prg.push(match token.as_str() {
-            "skriv-ut" => ops::Instruction::new(ops::Operator::Print, None, None, pos),
+            "skriv" => ops::Instruction::new(ops::Operator::Print, None, None, pos),
+            "skrivnl" => ops::Instruction::new(ops::Operator::PrintLn, None, None, pos),
             "spør" => ops::Instruction::new(ops::Operator::Input, None, None, pos),
             "+" => ops::Instruction::new(ops::Operator::Add, None, None, pos),
             "-" => ops::Instruction::new(ops::Operator::Sub, None, None, pos),

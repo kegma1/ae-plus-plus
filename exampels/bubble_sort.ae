@@ -11,13 +11,13 @@ inni
 slutt
 
 funk skriv_ut_liste Str Peker inni
-    snu skriv-ut
+    snu skriv
     0 når dup N < gjør
         over over + ,
-        Str omgjør "  " + skriv-ut
+        Str omgjør ", " + skriv
         1 +
     slutt
-    "\n" skriv-ut
+    "\n" skriv
 slutt
 
 funk sorter_list inni

@@ -24,7 +24,7 @@ slutt slipp
 
 2 når dup limit 1 + < gjør
     prime over + , hvis
-        dup skriv-ut
+        dup skrivnl
     slutt
     1 +
 slutt
