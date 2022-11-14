@@ -1,5 +1,7 @@
 use std::collections::HashMap;
-use std::env;
+use std::{env, fmt};
+use termsize;
+
 
 mod cross_ref;
 mod execute;
@@ -97,6 +99,31 @@ impl Runtime {
     }
 }
 
+impl fmt::Display for Runtime {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Stabel: ")?;
+        for v in &self.stack {
+            write!(f, "{}, ", v.to_string(&self))?;
+        }
+        write!(f,"\n")?;
+
+        write!(f, "Minne: ")?;
+        let mut mem = String::from("");
+        for v in &self.mem {
+            mem.push_str(&format!("{}, ", v.to_string(self)))
+        }
+        let width = termsize::get().unwrap().cols.into();
+        if (mem.len() + 7) <= width {
+            write!(f, "{}\n", mem)?;
+        } else {
+            write!(f, "{}...\n", &mem[0..(width - 10)])?;
+        }
+        
+        
+        Ok(())
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let flag: Option<&String>;
@@ -117,10 +144,7 @@ fn main() {
                 if let Err((e, pos)) = res {
                     println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
                 }
-                println!(
-                    "\nStabel: {:?}\nMinne {:?}\nDefinisjoner: {:?}\nReturner_stabel: {:?}",
-                    ctx.stack, ctx.mem, ctx.def, ctx.return_stack
-                )
+                println!("{}", ctx)
             }
         }
         None => {
