@@ -1,8 +1,9 @@
-"hallo\n" Peker omgjør
-dup "m" . 1 +
-dup "o" . 1 +
-dup "r" . 1 +
-dup "d" . 1 +
-dup "i" . 1 +
-5 - Str omgjør 
-skriv-ut # skriver ut mordi
+"hallo\n" 
+"hallo\n" 
+"hallo\n" 
+"hallo\n" 
+"hallo\n" 
+"hallo\n" 
+"hallo\n" 
+"hallo\n" 
+"hallo\n" 

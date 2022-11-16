@@ -1,0 +1,39 @@
+minne brett Bokst 9 slutt
+0 når dup 9 < gjør brett over + " " . 1 + slutt slipp
+minne spiller Bokst 1 slutt
+spiller "x" .
+
+funk bytt_spiller inni
+    spiller , "x" = hvis
+        spiller "o" .
+    ellers spiller , "o" = hvis
+        spiller "x" .
+    slutt
+slutt
+
+minne teller Helt 1 slutt
+
+funk sjekk_brett Bool -- Bool inni
+    slipp
+    0 når dup 9 < gjør
+        brett over + ,
+        spiller , = hvis
+            0 avslutt
+        ellers slutt  
+        1 +  
+    slutt
+slutt
+
+
+sann når dup gjør
+    "gjør et valg spiller " spiller , + ": " + spør
+    Helt omgjør
+    dup dup 0 >= snu 8 <= og hvis
+        brett over + spiller , . slipp
+        sjekk_brett
+        bytt_spiller
+
+    ellers
+        0 avslutt
+    slutt
+slutt

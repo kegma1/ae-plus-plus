@@ -43,6 +43,14 @@ pub fn execute(
                         let res = ctx.write(&crate::parse::parse_char(&new_str));
                         ctx.push(ops::Value::Str(res))
                     }
+                    (ops::Value::Str(x), ops::Value::Char(y)) => {
+                        let s1: String = ctx.read_str(&ops::Value::Str(x)).unwrap().clone();
+
+                        let new_str = s1 + &y.to_string();
+
+                        let res = ctx.write(&crate::parse::parse_char(&new_str));
+                        ctx.push(ops::Value::Str(res))
+                    }
                     (_, _) => {
                         let err_s: String = format!("'{} + {}' er ikke støttet", a, b).to_owned();
                         return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
