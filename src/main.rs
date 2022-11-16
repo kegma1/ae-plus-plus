@@ -1,26 +1,33 @@
 use std::collections::HashMap;
-use std::env;
+use std::{env, fmt};
+use termsize;
+
 
 mod cross_ref;
 mod execute;
 mod lex;
 mod ops;
 mod parse;
-// const MEM_SIZE: usize = 360_000;
 
 #[derive(Debug)]
 pub struct Runtime {
     stack: Vec<ops::Value>,
-    pub str_heap: Vec<String>,
+    mem: Vec<ops::Value>,
+    top: usize,
     pub def: HashMap<String, Option<ops::Value>>,
+    pub return_stack: Vec<usize>,
+    frame_stack: Vec<(Vec<ops::Value>, Option<ops::TypeLiteral>)>,
 }
 
 impl Runtime {
     pub fn new() -> Self {
         Runtime {
             stack: vec![],
-            str_heap: vec![],
+            mem: vec![],
+            top: 0,
             def: HashMap::new(),
+            return_stack: vec![],
+            frame_stack: vec![],
         }
     }
 
@@ -30,6 +37,97 @@ impl Runtime {
 
     pub fn pop(&mut self) -> Option<ops::Value> {
         self.stack.pop()
+    }
+
+    pub fn peek(&mut self) -> Option<&ops::Value> {
+        match self.stack.len() {
+            0 => None,
+            n => Some(&self.stack[n - 1]),
+        }
+    }
+
+    pub fn swap(&mut self, new_stack: Vec<ops::Value>, ret_typ: Option<ops::TypeLiteral>) {
+        self.frame_stack.push((self.stack.clone(), ret_typ));
+        self.stack = new_stack
+    }
+
+    pub fn retur(&mut self) -> Option<ops::TypeLiteral> {
+        let (old_stack, ret_type) = self.frame_stack.pop().unwrap();
+        self.stack = old_stack;
+        ret_type
+    }
+
+    pub fn write(&mut self, data: &Vec<ops::Value>) -> (ops::Ptr, usize) {
+        let ptr = self.top;
+        for val in data {
+            self.mem.push(val.clone());
+            self.top += 1;
+        }
+        (ptr, data.len())
+    }
+
+    pub fn over_write(&mut self, ptr: ops::Ptr, data: &ops::Value) {
+        self.mem[ptr] = data.clone()
+    }
+
+    pub fn read(&self, ptr: ops::Ptr) -> Option<ops::Value> {
+        self.mem.get(ptr).copied()
+    }
+
+    pub fn read_data(&self, ptr: ops::Ptr, len: usize) -> Option<&[ops::Value]> {
+        self.mem.get(ptr..(ptr + len))
+    }
+
+    pub fn read_str(&self, str_ptr: &ops::Value) -> Option<String> {
+        if let ops::Value::Str((ptr, len)) = str_ptr {
+            Some(
+                self.read_data(*ptr, *len)
+                    .unwrap()
+                    .iter()
+                    .map(|x| {
+                        if let ops::Value::Char(c) = x {
+                            c.clone()
+                        } else {
+                            '\0'
+                        }
+                    })
+                    .collect::<String>(),
+            )
+        } else {
+            None
+        }
+    }
+}
+
+impl fmt::Display for Runtime {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let width = termsize::get().unwrap().cols.into();
+
+        write!(f, "Stabel: ")?;
+        let mut stack = String::from("");
+        for v in &self.stack {
+            stack.push_str(&format!("{}, ", v.to_string(self)));
+        }
+
+        if (stack.len() + 8) <= width {
+            write!(f, "{}\n", stack)?;
+        } else {
+            write!(f, "...{}\n", &stack[(stack.len() - (width - 11))..(stack.len() - 1)])?;
+        }
+
+        write!(f, "Minne: ")?;
+        let mut mem = String::from("");
+        for v in &self.mem {
+            mem.push_str(&format!("{}, ", v.to_string(self)))
+        }
+        if (mem.len() + 7) <= width {
+            write!(f, "{}\n", mem)?;
+        } else {
+            write!(f, "{}...\n", &mem[0..(width - 10)])?;
+        }
+        
+        
+        Ok(())
     }
 }
 
@@ -53,10 +151,7 @@ fn main() {
                 if let Err((e, pos)) = res {
                     println!("{}:{}:{}  ERROR: {}\n", pos.2, pos.0, pos.1, e)
                 }
-                println!(
-                    "\nStack: {:?}\nStrings: {:?}\nDefenitions: {:?}",
-                    ctx.stack, ctx.str_heap, ctx.def
-                )
+                println!("{}", ctx)
             }
         }
         None => {

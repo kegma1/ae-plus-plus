@@ -1,6 +1,6 @@
-"skriv et tall mindre enn 10: " spør heltall omgjør
+"skriv et tall mindre enn 10: " spør Helt omgjør
 dup 10 > hvis
-    "sa mindre enn 10" skriv-ut
+    "sa mindre enn 10" skriv
 ellers
-    skriv-ut
+    skriv
 slutt

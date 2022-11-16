@@ -1,0 +1,80 @@
+minne brett Bokst 9 slutt
+0 når dup 9 < gjør brett over + " " . 1 + slutt slipp
+minne spiller Bokst 1 slutt
+spiller "x" .
+
+funk bytt_spiller inni
+    spiller , "x" = hvis
+        spiller "o" .
+    ellers spiller , "o" = hvis
+        spiller "x" .
+    slutt
+slutt
+minne i Helt 1 slutt
+
+funk sjekk_rad -- Bool inni
+    i 0 .
+    når i , 9 < gjør
+    # bool int
+        i , når dup i , 3 + < gjør
+            brett over + ,
+            spiller , =
+            snu
+            1 +
+        slutt slipp
+        og og
+        i i , 3 + .
+    slutt
+    eller eller
+slutt
+
+funk sjekk_kol -- Bool inni
+    i 0 .
+    når i , 3 < gjør
+        i , når dup i , 7 + < gjør
+            brett over + ,
+            spiller , =
+            snu
+            3 +
+        slutt slipp
+        og og
+        i i , 1 + .
+    slutt
+    eller eller
+slutt
+
+funk sjekk_brett Bool -- Bool inni
+    sjekk_rad
+    sjekk_kol
+    eller ikke
+slutt
+
+funk skriv_brett inni
+    i 0 .
+    når i , 9 < gjør
+        "|" skriv
+        i , når dup i , 3 + < gjør
+            brett over + , skriv "|" skriv
+            1 +
+        slutt
+        "\n" skriv
+        i i , 3 + .
+    slutt
+slutt
+
+
+sann når dup gjør
+    skriv_brett
+    "gjør et valg spiller " spiller , + ": " + spør
+    Helt omgjør 1 -
+    dup dup 0 >= snu 8 <= og hvis
+        brett over + , " " = hvis
+            brett over + spiller , . slipp
+            sjekk_brett
+            bytt_spiller
+        ellers slipp slutt
+    ellers
+        0 avslutt
+    slutt
+slutt
+skriv_brett

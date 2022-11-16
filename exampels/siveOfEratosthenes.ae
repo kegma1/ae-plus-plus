@@ -1,0 +1,31 @@
+konst limit 
+    "Skriv inn et tall større enn 1: " spør 
+    Helt omgjør 
+slutt
+
+minne prime Bool limit 1 + slutt
+0 når dup limit 1 + < gjør prime over + sann .  1 + slutt slipp
+
+minne p Helt 1 slutt
+p 2 .
+
+når p , p , * limit <= gjør 
+    prime p , +
+    let j inni
+        j , hvis
+            p , p , * når dup limit 1 + < gjør
+                prime over + usann .
+                p , +
+            slutt
+        slutt
+        p dup , 1 + .
+    slutt
+slutt
+
+2 når dup limit 1 + < gjør
+    prime over + , hvis
+        dup skrivnl
+    slutt
+    1 +
+slutt
+

@@ -1,0 +1,10 @@
+konst N 100 slutt
+minne x Helt N slutt
+
+x 0 når dup N < gjør
+# int ptr 
+    snu over over snu .
+    1 +
+    snu
+    1 +
+slutt

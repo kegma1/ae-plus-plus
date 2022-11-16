@@ -1,0 +1,31 @@
+konst navn "k!nn!t\n" slutt
+
+funk bytt_ut 
+    Bokst # bytte
+    Bokst # mønster
+    Str   # streng
+    -- 
+    Str 
+inni
+    Peker omgjør
+    snu 
+    konst x slutt
+    snu
+    konst e slutt
+    0 når dup 7 < gjør
+        dup rot 
+        over over + dup , 
+        x = hvis
+            e .
+        ellers
+            slipp
+        slutt
+        
+        snu slipp snu
+        1 +
+    slutt slipp
+    Str omgjør
+slutt
+
+navn skriv
+"e" "!" navn bytt_ut skriv

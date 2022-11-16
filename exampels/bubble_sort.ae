@@ -1,0 +1,59 @@
+konst N 10 slutt
+minne list Helt N slutt
+
+
+funk last 
+    Helt # data
+    Peker # list
+    Helt # index
+inni
+    + snu .
+slutt
+
+funk skriv_ut_liste Str Peker inni
+    snu skriv
+    0 når dup N < gjør
+        over over + ,
+        Str omgjør ", " + skriv
+        1 +
+    slutt
+    "\n" skriv
+slutt
+
+funk sorter_list inni
+    minne i Helt 1 slutt
+    N 1 - i snu .
+    når i , 1 > gjør
+        0 når dup i , < gjør
+            dup list +
+            i , list +
+            let a b inni
+                    a , b , > hvis
+                    a , b ,
+                    a snu . b snu .
+                slutt
+            slutt
+            1 +
+        slutt slipp
+        i , 1 - i snu .
+    slutt
+slutt
+
+
+# 3 9 2 1 6 4 10 5 8 7
+3  list 0 last
+9  list 1 last
+2  list 2 last
+1  list 3 last
+6  list 4 last
+4  list 5 last
+10 list 6 last
+5  list 7 last
+8  list 8 last
+7  list 9 last
+
+"usortert liste: " list skriv_ut_liste
+sorter_list
+"Sortert liste: " list skriv_ut_liste
+
+    
