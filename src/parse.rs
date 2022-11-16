@@ -28,6 +28,7 @@ pub fn parse(
             "skriv" => ops::Instruction::new(ops::Operator::Print, None, None, pos),
             "skrivnl" => ops::Instruction::new(ops::Operator::PrintLn, None, None, pos),
             "spør" => ops::Instruction::new(ops::Operator::Input, None, None, pos),
+            "feilsøk" => ops::Instruction::new(ops::Operator::Debug, None, None, pos),
             "+" => ops::Instruction::new(ops::Operator::Add, None, None, pos),
             "-" => ops::Instruction::new(ops::Operator::Sub, None, None, pos),
             "*" => ops::Instruction::new(ops::Operator::Mult, None, None, pos),

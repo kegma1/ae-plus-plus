@@ -863,6 +863,23 @@ pub fn execute(
                         j += 1
                     }
             }
+            ops::Operator::Debug => {
+                let _ = stdout().flush();
+                println!("");
+                let width = termsize::get().unwrap().cols.into();
+
+                print!("Stabel: ");
+                let mut stack = String::from("");
+                for v in &ctx.stack {
+                    stack.push_str(&format!("{}, ", v.to_string(ctx)));
+                }
+
+                if (stack.len() + 8) <= width {
+                    print!("{}", stack);
+                } else {
+                    print!("...{}", &stack[(stack.len() - (width - 11))..(stack.len() - 1)]);
+                }
+            }
         }
         // println!("{:?}", token.op);
         i += 1;

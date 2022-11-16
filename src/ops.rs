@@ -145,6 +145,7 @@ pub enum Operator {
     Print,
     PrintLn,
     Input,
+    Debug,
 
     Read,
     Write,
