@@ -136,8 +136,8 @@ x 1 .
 x 1 + 2 .
 x 2 + 3 .
 x 1 + , skriv # skriver ut 2
-
-# minnet vil se ut som: |1|2|3| | | | |...
+```
+minnet vil se ut som: |1|2|3| | | | |...
 #
 ### hvis og ellers
 ```
