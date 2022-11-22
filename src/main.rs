@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::{env, fmt};
 use termsize;
 
-
 mod cross_ref;
 mod execute;
 mod lex;
@@ -112,7 +111,11 @@ impl fmt::Display for Runtime {
         if (stack.len() + 8) <= width {
             write!(f, "{}\n", stack)?;
         } else {
-            write!(f, "...{}\n", &stack[(stack.len() - (width - 11))..(stack.len() - 1)])?;
+            write!(
+                f,
+                "...{}\n",
+                &stack[(stack.len() - (width - 11))..(stack.len() - 1)]
+            )?;
         }
 
         write!(f, "Minne: ")?;
@@ -125,8 +128,7 @@ impl fmt::Display for Runtime {
         } else {
             write!(f, "{}...\n", &mem[0..(width - 10)])?;
         }
-        
-        
+
         Ok(())
     }
 }
@@ -180,4 +182,24 @@ fn run(path: &String) -> Result<u8, (&'static str, ops::Pos)> {
     let mut parsed = parse::parse(lexed, &mut ctx)?;
     let cross_refed = cross_ref::cross_reference(&mut parsed, &ctx)?;
     execute::execute(&mut ctx, &cross_refed)
+}
+
+#[macro_export]
+macro_rules! report_err {
+    ($tok:expr, $err_msg:expr) => {
+        return Err((
+            $err_msg,
+            $tok.clone(),
+        ))
+    };
+
+    ($pos:expr, $($arg:tt)*) => {
+        let err_s: String = format!($($arg)*).to_owned();
+        return Err((Box::leak(err_s.into_boxed_str()), $pos.clone()));
+    };
+
+    // ($pos:expr, $($arg:tt)*) => {
+    //     let err_s: String = format!($($arg)*).to_owned();
+    //     return Err((Box::leak(err_s.into_boxed_str()), $pos.clone()));
+    // };
 }

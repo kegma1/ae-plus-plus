@@ -63,11 +63,17 @@ impl Value {
         }
     }
 
-    pub fn to_string(&self, ctx:& crate::Runtime) -> String {
+    pub fn to_string(&self, ctx: &crate::Runtime) -> String {
         match self {
             Value::Int(x) => x.to_string(),
             Value::Float(x) => x.to_string(),
-            Value::Bool(x) => if *x {String::from("sann")} else {String::from("usann")},
+            Value::Bool(x) => {
+                if *x {
+                    String::from("sann")
+                } else {
+                    String::from("usann")
+                }
+            }
             Value::Str(_) => ctx.read_str(self).unwrap(),
             Value::Byte(x) => String::from(format!("{:#02x}", x)),
             Value::Char(x) => x.to_string(),

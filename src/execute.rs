@@ -1,5 +1,13 @@
-use crate::{ops, Runtime};
+use crate::{ops, report_err, Runtime};
 use std::io::{stdin, stdout, Write};
+
+macro_rules! check_stack_min {
+    ($ctx:expr, $tok:expr, $min_len:expr, $err_msg:expr) => {
+        if $ctx.stack.len() < $min_len {
+            report_err!($tok.pos, $err_msg)
+        }
+    };
+}
 
 pub fn execute(
     ctx: &mut Runtime,
@@ -12,12 +20,12 @@ pub fn execute(
         match token.op {
             ops::Operator::Literal => ctx.push(token.val.unwrap()),
             ops::Operator::Add => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'+' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'+' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -52,18 +60,17 @@ pub fn execute(
                         ctx.push(ops::Value::Str(res))
                     }
                     (_, _) => {
-                        let err_s: String = format!("'{} + {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} + {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::Sub => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'-' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'-' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -81,18 +88,17 @@ pub fn execute(
                         ctx.push(ops::Value::Float(x - y))
                     }
                     (_, _) => {
-                        let err_s: String = format!("'{} - {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} - {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::Mult => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'*' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'*' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -104,18 +110,17 @@ pub fn execute(
                         ctx.push(ops::Value::Float(x * y))
                     }
                     (_, _) => {
-                        let err_s: String = format!("'{} * {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} * {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::Div => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'/' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'/' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -134,29 +139,18 @@ pub fn execute(
                         ctx.push(ops::Value::Float(x / y))
                     }
                     (_, _) => {
-                        let err_s: String = format!("'{} / {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} / {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::Print => {
-                if ctx.stack.len() < 1 {
-                    return Err((
-                        "'skriv' operator krever minst 1 argument",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(ctx, token, 1, "'skriv' operator krever minst 1 argument");
 
                 let print_val = ctx.pop().unwrap();
                 print!("{}", print_val.to_string(ctx))
             }
             ops::Operator::PrintLn => {
-                if ctx.stack.len() < 1 {
-                    return Err((
-                        "'skrivnl' operator krever minst 1 argument",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(ctx, token, 1, "'skrivnl' operator krever minst 1 argument");
 
                 let print_val = ctx.pop().unwrap();
                 print!("{}\n", print_val.to_string(ctx))
@@ -186,9 +180,7 @@ pub fn execute(
                 ctx.push(ops::Value::Str(res));
             }
             ops::Operator::Not => {
-                if ctx.stack.len() < 1 {
-                    return Err(("'ikke' operator krever minst 1 argument", token.pos.clone()));
-                }
+                check_stack_min!(ctx, token, 1, "'ikke' operator krever minst 1 argument");
 
                 let b = ctx.pop().unwrap();
 
@@ -197,18 +189,17 @@ pub fn execute(
                     ops::Value::Int(x) => ctx.push(ops::Value::Int(!x)),
                     ops::Value::Byte(x) => ctx.push(ops::Value::Byte(!x)),
                     _ => {
-                        let err_s: String = format!("'ike {}' er ikke støttet", b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'ikke {}' er ikke støttet", b);
                     }
                 }
             }
             ops::Operator::And => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'og' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'og' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -220,18 +211,17 @@ pub fn execute(
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x & y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x & y)),
                     (_, _) => {
-                        let err_s: String = format!("'{} en {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} og {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::Or => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'eller' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'eller' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -243,18 +233,17 @@ pub fn execute(
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x | y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x | y)),
                     (_, _) => {
-                        let err_s: String = format!("'{} anu {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} eller {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::Eq => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'=' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'=' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -281,18 +270,17 @@ pub fn execute(
                     }
                     (x, ops::Value::TypeLiteral(y)) => ctx.push(ops::Value::Bool(x.eq(&y))),
                     (_, _) => {
-                        let err_s: String = format!("'{} = {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} = {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::Lt => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'<' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'<' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -305,18 +293,17 @@ pub fn execute(
                         ctx.push(ops::Value::Bool(x < y))
                     }
                     (_, _) => {
-                        let err_s: String = format!("'{} < {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} < {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::Le => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'<=' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'<=' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -333,18 +320,17 @@ pub fn execute(
                         ctx.push(ops::Value::Bool(x <= y))
                     }
                     (_, _) => {
-                        let err_s: String = format!("'{} <= {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} <= {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::Gt => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'>' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'>' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -357,18 +343,17 @@ pub fn execute(
                         ctx.push(ops::Value::Bool(x > y))
                     }
                     (_, _) => {
-                        let err_s: String = format!("'{} > {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} > {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::Ge => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'>=' operator krever minst 2 argumenter av samme type",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(
+                    ctx,
+                    token,
+                    2,
+                    "'>=' operator krever minst 2 argumenter av samme type"
+                );
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -385,18 +370,12 @@ pub fn execute(
                         ctx.push(ops::Value::Bool(x >= y))
                     }
                     (_, _) => {
-                        let err_s: String = format!("'{} >= {}' er ikke støttet", a, b).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "'{} >= {}' er ikke støttet", a, b);
                     }
                 }
             }
             ops::Operator::If => {
-                if ctx.stack.len() < 1 {
-                    return Err((
-                        "'hvis' operator krever minst 1 argumentet",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(ctx, token, 1, "'hvis' operator krever minst 1 argumentet");
 
                 let con = ctx.pop().unwrap();
 
@@ -408,43 +387,45 @@ pub fn execute(
                         i = token.arg.unwrap();
                     }
                 } else {
-                    let err_s: String =
-                        format!("'ike {}' er ikke støttet. 'ike' only takes Bool", con).to_owned();
-                    return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                    report_err!(
+                        token.pos,
+                        "'ike {}' er ikke støttet. 'ike' only takes Bool",
+                        con
+                    );
                 }
             }
             ops::Operator::End => {
                 if let Some(ptr) = token.arg {
                     if let ops::Operator::Const = prg[ptr].op {
-                        if ctx.stack.len() < 1 {
-                            return Err((
-                                "'konst' definisjon krever et element på toppen av stabelen",
-                                token.pos.clone(),
-                            ));
-                        }
+                        check_stack_min!(
+                            ctx,
+                            token,
+                            1,
+                            "'konst' definisjon krever et element på toppen av stabelen"
+                        );
+
                         let val = ctx.pop().unwrap();
                         let name = &prg[ptr + 1].name;
 
                         if let Some(key) = name {
                             if ctx.def[key] != None {
-                                let err_s: String = format!(
+                                report_err!(
+                                    token.pos,
                                     "'{}' kan ikke omdefineres ettersom den er konstant",
                                     key
-                                )
-                                .to_owned();
-                                return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                                );
                             }
                             ctx.def.insert(key.to_string(), Some(val));
                         } else {
                             return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));
                         }
                     } else if let ops::Operator::Mem = prg[ptr].op {
-                        if ctx.stack.len() < 2 {
-                            return Err((
-                                "'minne' definisjon krever en type og en lengde på toppen av stabelenm",
-                                token.pos.clone(),
-                            ));
-                        }
+                        check_stack_min!(
+                            ctx,
+                            token,
+                            2,
+                            "'minne' definisjon krever en type og en lengde på toppen av stabelen"
+                        );
 
                         let ops::Value::Int(len) = ctx.pop().unwrap() else {
                             return Err((
@@ -468,12 +449,11 @@ pub fn execute(
 
                         if let Some(key) = name {
                             if ctx.def[key] != None {
-                                let err_s: String = format!(
+                                report_err!(
+                                    token.pos,
                                     "'{}' kan ikke omdefineres ettersom den er konstant",
                                     key
-                                )
-                                .to_owned();
-                                return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                                );
                             }
 
                             let res = ctx.write(&vec![ops::Value::Null; len as usize]);
@@ -491,13 +471,12 @@ pub fn execute(
                                 if val.eq(&typ) {
                                     ctx.push(val)
                                 } else {
-                                    let err_s: String =
-                                        format!("forvendtet '{:?}' men fant '{}'", typ, val)
-                                            .to_owned();
-                                    return Err((
-                                        Box::leak(err_s.into_boxed_str()),
-                                        token.pos.clone(),
-                                    ));
+                                    report_err!(
+                                        token.pos,
+                                        "forventet '{:?}' men fant '{}'",
+                                        typ,
+                                        val
+                                    );
                                 }
                             }
                             (None, Some(_)) => {
@@ -517,9 +496,7 @@ pub fn execute(
                 }
             }
             ops::Operator::Do => {
-                if ctx.stack.len() < 1 {
-                    return Err(("'gjør' operator krever minst 1 argument", token.pos.clone()));
-                }
+                check_stack_min!(ctx, token, 1, "'gjør' operator krever minst 1 argument");
 
                 let con = ctx.pop().unwrap();
 
@@ -531,15 +508,14 @@ pub fn execute(
                         i = token.arg.unwrap();
                     }
                 } else {
-                    let err_s: String =
-                        format!("'gjør {}' er ikke støttet. 'gjør' only takes Bool", con)
-                            .to_owned();
-                    return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                    report_err!(
+                        token.pos,
+                        "'gjør {}' er ikke støttet. 'gjør' only takes Bool",
+                        con
+                    );
                 }
             }
-            ops::Operator::While
-            | ops::Operator::Const
-            | ops::Operator::Mem => (),
+            ops::Operator::While | ops::Operator::Const | ops::Operator::Mem => (),
             ops::Operator::Dup => {
                 if ctx.stack.len() < 1 {
                     return Err(("'dup' operator krever minst 1 argument", token.pos.clone()));
@@ -551,22 +527,12 @@ pub fn execute(
                 ctx.push(b);
             }
             ops::Operator::Drop => {
-                if ctx.stack.len() < 1 {
-                    return Err((
-                        "'slipp' operator krever minst 1 argument",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(ctx, token, 1, "'slipp' operator krever minst 1 argument");
 
                 let _ = ctx.pop().unwrap();
             }
             ops::Operator::Swap => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'snu' operator krever minst 2 argumenter",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(ctx, token, 2, "'snu' operator krever minst 2 argumenter");
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -575,12 +541,7 @@ pub fn execute(
                 ctx.push(a);
             }
             ops::Operator::Over => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'over' operator krever minst 2 argumenter",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(ctx, token, 2, "'over' operator krever minst 2 argumenter");
 
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
@@ -590,12 +551,7 @@ pub fn execute(
                 ctx.push(a);
             }
             ops::Operator::Rot => {
-                if ctx.stack.len() < 3 {
-                    return Err((
-                        "'rot' operator krever minst 3 argumenter",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(ctx, token, 3, "'rot' operator krever minst 3 argumenter");
 
                 let c = ctx.pop().unwrap();
                 let b = ctx.pop().unwrap();
@@ -606,12 +562,7 @@ pub fn execute(
                 ctx.push(a);
             }
             ops::Operator::Cast => {
-                if ctx.stack.len() < 2 {
-                    return Err((
-                        "'omgjør' operator krever minst 2 argumenter",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(ctx, token, 2, "'omgjør' operator krever minst 2 argumenter");
 
                 let typ = ctx.pop().unwrap();
                 let b = ctx.pop().unwrap();
@@ -639,9 +590,7 @@ pub fn execute(
                             }
                         }
                         _ => {
-                            let err_s: String =
-                                format!("Kunne ikke omgjøre {} til {}", b, typ).to_owned();
-                            return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                            report_err!(token.pos, "Kunne ikke omgjøre {} til {}", b, typ);
                         }
                     },
                     (ops::Value::TypeLiteral(ops::TypeLiteral::Float), _) => match b {
@@ -666,9 +615,7 @@ pub fn execute(
                             }
                         }
                         _ => {
-                            let err_s: String =
-                                format!("Kunne ikke omgjøre {} til {}", b, typ).to_owned();
-                            return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                            report_err!(token.pos, "Kunne ikke omgjøre {} til {}", b, typ);
                         }
                     },
                     (ops::Value::TypeLiteral(ops::TypeLiteral::Str), _) => match b {
@@ -689,16 +636,12 @@ pub fn execute(
                         }
                         ops::Value::Ptr(x) => {
                             if x.2 != ops::TypeLiteral::Char {
-                                let err_s: String =
-                                    format!("Forventet 'Bokst' fant '{:?} ", x.2).to_owned();
-                                return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                                report_err!(token.pos, "Forventet 'Bokst' fant '{:?} ", x.2);
                             }
                             ctx.push(ops::Value::Str((x.0, x.1)))
                         }
                         _ => {
-                            let err_s: String =
-                                format!("Kunne ikke omgjøre {} til {}", b, typ).to_owned();
-                            return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                            report_err!(token.pos, "Kunne ikke omgjøre {} til {}", b, typ);
                         }
                     },
                     (ops::Value::TypeLiteral(ops::TypeLiteral::Ptr), _) => match b {
@@ -707,21 +650,16 @@ pub fn execute(
                             ctx.push(ops::Value::Ptr(new_x))
                         }
                         _ => {
-                            let err_s: String =
-                                format!("Kunne ikke omgjøre {} til {}", b, typ).to_owned();
-                            return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                            report_err!(token.pos, "Kunne ikke omgjøre {} til {}", b, typ);
                         }
                     },
                     (_, _) => {
-                        let err_s: String = format!("Kunne ikke omgjøre {} til {}. Andre argument må være en bokstavelig type", b, typ).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos,"Kunne ikke omgjøre {} til {}. Andre argument må være en bokstavelig type", b, typ);
                     }
                 }
             }
             ops::Operator::Read => {
-                if ctx.stack.len() < 1 {
-                    return Err(("',' operator krever minst 1 argument", token.pos.clone()));
-                }
+                check_stack_min!(ctx, token, 1, "',' operator krever minst 1 argument");
 
                 let ptr = ctx.pop().unwrap();
 
@@ -729,23 +667,18 @@ pub fn execute(
                     let val = ctx.read(x.0).unwrap();
                     ctx.push(val)
                 } else {
-                    let err_s: String =
-                        format!("Kunne ikke lese fra minne adresse '{}'", ptr).to_owned();
-                    return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                    report_err!(token.pos, "Kunne ikke lese fra minne adresse '{}'", ptr);
                 }
             }
             ops::Operator::Write => {
-                if ctx.stack.len() < 2 {
-                    return Err(("'.' operator krever minst 2 argument", token.pos.clone()));
-                }
-                let val = ctx.pop().unwrap();
+                check_stack_min!(ctx, token, 2, "'.' operator krever minst 2 argument");
+
+                let val = ctx.pop().unwrap(); // burde switches rundt, peker først så verdi
                 let ptr = ctx.pop().unwrap();
 
                 if let ops::Value::Ptr(x) = ptr {
                     if !val.eq(&x.2) {
-                        let err_s: String =
-                            format!("Forvendtet {:?} men fant {}", x.2, val).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                        report_err!(token.pos, "Forventet {:?} men fant {}", x.2, val);
                     }
                     ctx.over_write(x.0, &val)
                 } else {
@@ -766,12 +699,7 @@ pub fn execute(
                 }
             }
             ops::Operator::Exit => {
-                if ctx.stack.len() < 1 {
-                    return Err((
-                        "'avslutt' operator krever minst 1 argument",
-                        token.pos.clone(),
-                    ));
-                }
+                check_stack_min!(ctx, token, 1, "'avslutt' operator krever minst 1 argument");
                 let code = ctx.pop().unwrap();
                 if let ops::Value::Int(x) = code {
                     let _ = stdout().flush();
@@ -799,17 +727,14 @@ pub fn execute(
                     while !params_collected {
                         if let Some(ops::Value::TypeLiteral(_)) = ctx.peek() {
                             let ops::Value::TypeLiteral(typ) = ctx.pop().unwrap() else {
-                            return Err(("Noet gikk galt med funksjons definisjonen", token.pos.clone()));
+                            return Err(("Noe gikk galt med funksjons definisjonen", token.pos.clone()));
                         };
                             params.push(typ)
                         } else if let Some(ops::Value::Null) = ctx.peek() {
                             let _ = ctx.pop();
                             match params.len() {
                                 0 => {
-                                    return Err((
-                                        "Fant ingen returnerings type",
-                                        token.pos.clone(),
-                                    ));
+                                    return Err(("Fant ingen return type", token.pos.clone()));
                                 }
                                 1 => ret_typ = params.pop(),
                                 _ => {
@@ -831,9 +756,7 @@ pub fn execute(
                             if val.eq(&typ) {
                                 params_value.push(val)
                             } else {
-                                let err_s: String =
-                                    format!("Forventet '{:?}' men fant '{}'", typ, val).to_owned();
-                                return Err((Box::leak(err_s.into_boxed_str()), token.pos.clone()));
+                                report_err!(token.pos, "Forventet '{:?}' men fant '{}'", typ, val);
                             }
                         } else {
                             return Err((
@@ -857,11 +780,11 @@ pub fn execute(
             ops::Operator::BikeShed => ctx.push(ops::Value::Null),
             ops::Operator::Let => {
                 let mut j = i + 1;
-                    while let ops::Operator::Word = prg[j].op {
-                        let name = prg[j].name.as_ref().unwrap();
-                        ctx.def.insert(name.clone(), None);
-                        j += 1
-                    }
+                while let ops::Operator::Word = prg[j].op {
+                    let name = prg[j].name.as_ref().unwrap();
+                    ctx.def.insert(name.clone(), None);
+                    j += 1
+                }
             }
             ops::Operator::Debug => {
                 let _ = stdout().flush();
@@ -877,7 +800,10 @@ pub fn execute(
                 if (stack.len() + 8) <= width {
                     print!("{}", stack);
                 } else {
-                    print!("...{}", &stack[(stack.len() - (width - 11))..(stack.len() - 1)]);
+                    print!(
+                        "...{}",
+                        &stack[(stack.len() - (width - 11))..(stack.len() - 1)]
+                    );
                 }
             }
         }
@@ -887,4 +813,3 @@ pub fn execute(
 
     Ok(0)
 }
-

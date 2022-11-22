@@ -1,6 +1,5 @@
-use crate::{ops, Runtime};
+use crate::{ops, report_err, Runtime};
 use snailquote::unescape;
-// https://github.com/ttm/tokipona/blob/master/data/toki-pona_english.txt
 
 enum Mode {
     Normal,
@@ -205,8 +204,7 @@ pub fn parse(
             _ => match state {
                 Mode::Normal => {
                     if !ctx.def.contains_key(&token) {
-                        let err_s: String = format!("ukjent ord '{}'", token).to_owned();
-                        return Err((Box::leak(err_s.into_boxed_str()), pos.clone()));
+                        report_err!(pos, "ukjent ord '{}'", token);
                     }
 
                     ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
