@@ -18,7 +18,7 @@ pub fn execute(
         let token = &prg[i];
 
         match token.op {
-            ops::Operator::Literal => ctx.push(token.val.unwrap()),
+            ops::Operator::Literal => ctx.push(token.val.clone().unwrap()),
             ops::Operator::Add => {
                 check_stack_min!(
                     ctx,
@@ -30,21 +30,21 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x + y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x + y)),
                     (ops::Value::Ptr(x), ops::Value::Int(y)) => {
-                        ctx.push(ops::Value::Ptr((x.0 + y as usize, x.1, x.2)))
+                        ctx.push(ops::Value::Ptr((x.0 + *y as usize, x.1, x.2)))
                     }
                     (ops::Value::Int(y), ops::Value::Ptr(x)) => {
-                        ctx.push(ops::Value::Ptr((x.0 + y as usize, x.1, x.2)))
+                        ctx.push(ops::Value::Ptr((x.0 + *y as usize, x.1, x.2)))
                     }
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Float(x + y))
                     }
                     (ops::Value::Str(x), ops::Value::Str(y)) => {
-                        let s1: String = ctx.read_str(&ops::Value::Str(x)).unwrap().clone();
-                        let s2: String = ctx.read_str(&ops::Value::Str(y)).unwrap().clone();
+                        let s1: String = ctx.read_str(&ops::Value::Str(*x)).unwrap().clone();
+                        let s2: String = ctx.read_str(&ops::Value::Str(*y)).unwrap().clone();
 
                         let new_str = s1 + &s2;
 
@@ -52,7 +52,7 @@ pub fn execute(
                         ctx.push(ops::Value::Str(res))
                     }
                     (ops::Value::Str(x), ops::Value::Char(y)) => {
-                        let s1: String = ctx.read_str(&ops::Value::Str(x)).unwrap().clone();
+                        let s1: String = ctx.read_str(&ops::Value::Str(*x)).unwrap().clone();
 
                         let new_str = s1 + &y.to_string();
 
@@ -75,14 +75,14 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x - y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x - y)),
                     (ops::Value::Ptr(x), ops::Value::Int(y)) => {
-                        ctx.push(ops::Value::Ptr((x.0 - y as usize, x.1, x.2)))
+                        ctx.push(ops::Value::Ptr((x.0 - *y as usize, x.1, x.2)))
                     }
                     (ops::Value::Int(y), ops::Value::Ptr(x)) => {
-                        ctx.push(ops::Value::Ptr((x.0 - y as usize, x.1, x.2)))
+                        ctx.push(ops::Value::Ptr((x.0 - *y as usize, x.1, x.2)))
                     }
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
                         ctx.push(ops::Value::Float(x - y))
@@ -103,7 +103,7 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x * y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x * y)),
                     (ops::Value::Float(x), ops::Value::Float(y)) => {
@@ -125,7 +125,7 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Int(x), ops::Value::Int(y)) => {
                         ctx.push(ops::Value::Int(x % y));
                         ctx.push(ops::Value::Int(x / y))
@@ -204,9 +204,9 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Bool(x), ops::Value::Bool(y)) => {
-                        ctx.push(ops::Value::Bool(x && y))
+                        ctx.push(ops::Value::Bool(*x && *y))
                     }
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x & y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x & y)),
@@ -226,9 +226,9 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Bool(x), ops::Value::Bool(y)) => {
-                        ctx.push(ops::Value::Bool(x || y))
+                        ctx.push(ops::Value::Bool(*x || *y))
                     }
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Int(x | y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Byte(x | y)),
@@ -248,7 +248,7 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Bool(x), ops::Value::Bool(y)) => {
                         ctx.push(ops::Value::Bool(x == y))
                     }
@@ -260,8 +260,8 @@ pub fn execute(
                         ctx.push(ops::Value::Bool(x == y))
                     }
                     (ops::Value::Str(x), ops::Value::Str(y)) => {
-                        let s1 = ctx.read_str(&ops::Value::Str(x)).unwrap();
-                        let s2 = ctx.read_str(&ops::Value::Str(y)).unwrap();
+                        let s1 = ctx.read_str(&ops::Value::Str(*x)).unwrap();
+                        let s2 = ctx.read_str(&ops::Value::Str(*y)).unwrap();
 
                         ctx.push(ops::Value::Bool(s1 == s2))
                     }
@@ -285,7 +285,7 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Bool(x), ops::Value::Bool(y)) => ctx.push(ops::Value::Bool(x < y)),
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Bool(x < y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Bool(x < y)),
@@ -308,7 +308,7 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Bool(x), ops::Value::Bool(y)) => {
                         ctx.push(ops::Value::Bool(x <= y))
                     }
@@ -335,7 +335,7 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Bool(x), ops::Value::Bool(y)) => ctx.push(ops::Value::Bool(x > y)),
                     (ops::Value::Int(x), ops::Value::Int(y)) => ctx.push(ops::Value::Bool(x > y)),
                     (ops::Value::Byte(x), ops::Value::Byte(y)) => ctx.push(ops::Value::Bool(x > y)),
@@ -358,7 +358,7 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                match (a, b) {
+                match (&a, &b) {
                     (ops::Value::Bool(x), ops::Value::Bool(y)) => {
                         ctx.push(ops::Value::Bool(x >= y))
                     }
@@ -515,7 +515,31 @@ pub fn execute(
                     );
                 }
             }
-            ops::Operator::While | ops::Operator::Const | ops::Operator::Mem => (),
+            ops::Operator::While => (),
+            ops::Operator::Mem => {
+                let name = &prg[i + 1];
+                if name.op == ops::Operator::Word {
+                    let Some(key) = &name.name else {
+                        report_err!(token.pos, "Kunne ikke finne navn");
+                    };
+                    ctx.def.insert(key.to_string(), None);
+                } else {
+                    report_err!(token.pos, "Kunne ikke finne navn til minne");
+                }
+                i += 1
+            },
+            ops::Operator::Const => {
+                let name = &prg[i + 1];
+                if name.op == ops::Operator::Word {
+                    let Some(key) = &name.name else {
+                        report_err!(token.pos, "Kunne ikke finne navn");
+                    };
+                    ctx.def.insert(key.to_string(), None);
+                } else {
+                    report_err!(token.pos, "Kunne ikke finne navn til konstant");
+                }
+                i += 1
+            },
             ops::Operator::Dup => {
                 if ctx.stack.len() < 1 {
                     return Err(("'dup' operator krever minst 1 argument", token.pos.clone()));
@@ -523,7 +547,7 @@ pub fn execute(
 
                 let b = ctx.pop().unwrap();
 
-                ctx.push(b);
+                ctx.push(b.clone());
                 ctx.push(b);
             }
             ops::Operator::Drop => {
@@ -546,7 +570,7 @@ pub fn execute(
                 let b = ctx.pop().unwrap();
                 let a = ctx.pop().unwrap();
 
-                ctx.push(a);
+                ctx.push(a.clone());
                 ctx.push(b);
                 ctx.push(a);
             }
@@ -567,7 +591,7 @@ pub fn execute(
                 let typ = ctx.pop().unwrap();
                 let b = ctx.pop().unwrap();
 
-                match (typ, b) {
+                match (&typ, &b) {
                     (ops::Value::TypeLiteral(ops::TypeLiteral::Int), _) => match b {
                         ops::Value::Float(x) => ctx.push(ops::Value::Int(x as i32)),
                         ops::Value::Bool(x) => {
@@ -690,11 +714,13 @@ pub fn execute(
             }
             ops::Operator::Word => {
                 if let Some(key) = &token.name {
-                    if let Some(ops::Value::FuncPtr(func_ptr)) = ctx.def[key] {
+                    if let Some(ops::Value::FuncPtr(func_ptr)) = &ctx.def[key] {
                         ctx.return_stack.push(i);
-                        i = func_ptr
-                    } else if let Some(val) = ctx.def[key] {
-                        ctx.push(val)
+                        i = func_ptr.ptr
+                    } else if let Some(val) = &ctx.def[key] {
+                        ctx.push(val.clone())
+                    } else {
+                        report_err!(token.pos, "Ukjent ord {}", key);
                     }
                 }
             }
@@ -709,15 +735,48 @@ pub fn execute(
                 }
             }
             ops::Operator::Func => {
-                let word_i = i + 1;
-                let word_opt = &prg[word_i].name;
-                if let Some(word) = word_opt {
-                    ctx.def
-                        .insert(word.clone(), Some(ops::Value::FuncPtr(word_i)));
+                let name = &prg[i + 1];
+                if name.op == ops::Operator::Word {
+                    let Some(key) = &name.name else {
+                        report_err!(token.pos, "Kunne ikke finne navn");
+                    };
+                    let mut params: Vec<ops::TypeLiteral> = vec![];
+                    let mut returns: Vec<ops::TypeLiteral> = vec![];
+                    let mut all_params_found = false;
+
+                    let mut j = i + 1;
+                    while &prg[j].op != &ops::Operator::In {
+                        let current_argument = &prg[j];
+                        if !all_params_found {
+                            let Some(ops::Value::TypeLiteral(arg_typ)) = &current_argument.val else {
+                                report_err!(current_argument.pos, "Forventet 'TypeLitr' men fant {}", current_argument.val.as_ref().unwrap());
+                            };
+                            params.push(*arg_typ)
+                        } else {
+                            let Some(ops::Value::TypeLiteral(arg_typ)) = &current_argument.val else {
+                                report_err!(current_argument.pos, "Forventet 'TypeLitr' men fant {}", current_argument.val.as_ref().unwrap());
+                            };
+                            returns.push(*arg_typ)
+                        }
+
+                        if current_argument.op == ops::Operator::BikeShed {
+                            all_params_found = true
+                        }
+
+                        j += 1;
+                    }
+
+                    let func_ptr = ops::FuncPtr {
+                        ptr: j,
+                        params,
+                        returns
+                    };
+                    
+                    ctx.def.insert(key.to_string(), Some(ops::Value::FuncPtr(func_ptr)));
                 } else {
-                    return Err(("Kunne ikke finne funksjons navn", token.pos.clone()));
+                    report_err!(token.pos, "Kunne ikke finne navn til funksjon");
                 }
-                i = token.arg.unwrap();
+                i = token.arg.unwrap()
             }
             ops::Operator::In => {
                 if let ops::Operator::Func = prg[token.arg.unwrap()].op {
@@ -777,7 +836,7 @@ pub fn execute(
                     }
                 }
             }
-            ops::Operator::BikeShed => ctx.push(ops::Value::Null),
+            ops::Operator::BikeShed => (),
             ops::Operator::Let => {
                 let mut j = i + 1;
                 while let ops::Operator::Word = prg[j].op {

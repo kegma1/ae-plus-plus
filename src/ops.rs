@@ -25,16 +25,19 @@ impl fmt::Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}, ", self.op).unwrap();
         if let Some(x) = self.arg {
-            write!(f, "{:?}, ", x).unwrap();
+            write!(f, "{}, ", x).unwrap();
         }
-        if let Some(x) = self.val {
-            write!(f, "{:?}, ", x).unwrap();
+        if let Some(x) = &self.val {
+            write!(f, "{}, ", x).unwrap();
+        }
+        if let Some(x) = &self.name {
+            write!(f, "{}, ", x).unwrap();
         }
         Ok(())
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Value {
     Int(i32),
     Float(f32),
@@ -45,7 +48,7 @@ pub enum Value {
     Ptr((Ptr, usize, TypeLiteral)), // ikke implementert
 
     TypeLiteral(TypeLiteral),
-    FuncPtr(usize),
+    FuncPtr(FuncPtr),
     Null,
 }
 
@@ -180,6 +183,14 @@ pub enum Operator {
     Over,
     Rot,
     // Null
+}
+
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct FuncPtr {
+    pub ptr: usize,
+    pub params: Vec<TypeLiteral>,
+    pub returns: Vec<TypeLiteral>
 }
 
 // skal gjøre pekere bedre senere.

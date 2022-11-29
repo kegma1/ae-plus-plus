@@ -1,12 +1,5 @@
-use crate::{ops, report_err, Runtime};
+use crate::{ops, Runtime};
 use snailquote::unescape;
-
-enum Mode {
-    Normal,
-    Define,
-    Function,
-    Let,
-}
 
 pub fn parse(
     prg: Vec<(String, ops::Pos)>,
@@ -19,7 +12,6 @@ pub fn parse(
     let unwraped_prg = prg;
     let mut i = 0;
     let prg_len = unwraped_prg.len();
-    let mut state = Mode::Normal;
     while i < prg_len {
         let (token, pos) = unwraped_prg[i].clone();
         // println!("{}", i);
@@ -40,12 +32,7 @@ pub fn parse(
             "ellers" => ops::Instruction::new(ops::Operator::Else, None, None, pos),
             "slutt" => ops::Instruction::new(ops::Operator::End, None, None, pos),
             "gjør" => ops::Instruction::new(ops::Operator::Do, None, None, pos),
-            "inni" => {
-                if let Mode::Let = state {
-                    state = Mode::Normal
-                }
-                ops::Instruction::new(ops::Operator::In, None, None, pos)
-            }
+            "inni" => ops::Instruction::new(ops::Operator::In, None, None, pos),
             "når" => ops::Instruction::new(ops::Operator::While, None, None, pos),
             "dup" => ops::Instruction::new(ops::Operator::Dup, None, None, pos),
             "rot" => ops::Instruction::new(ops::Operator::Rot, None, None, pos),
@@ -54,22 +41,10 @@ pub fn parse(
             "snu" => ops::Instruction::new(ops::Operator::Swap, None, None, pos),
             "avslutt" => ops::Instruction::new(ops::Operator::Exit, None, None, pos),
             "omgjør" => ops::Instruction::new(ops::Operator::Cast, None, None, pos),
-            "konst" => {
-                state = Mode::Define;
-                ops::Instruction::new(ops::Operator::Const, None, None, pos)
-            }
-            "minne" => {
-                state = Mode::Define;
-                ops::Instruction::new(ops::Operator::Mem, None, None, pos)
-            }
-            "funk" => {
-                state = Mode::Function;
-                ops::Instruction::new(ops::Operator::Func, None, None, pos)
-            }
-            "let" => {
-                state = Mode::Let;
-                ops::Instruction::new(ops::Operator::Let, None, None, pos)
-            }
+            "konst" => ops::Instruction::new(ops::Operator::Const, None, None, pos),
+            "minne" => ops::Instruction::new(ops::Operator::Mem, None, None, pos),
+            "funk" => ops::Instruction::new(ops::Operator::Func, None, None, pos),
+            "let" => ops::Instruction::new(ops::Operator::Let, None, None, pos),
             "=" => ops::Instruction::new(ops::Operator::Eq, None, None, pos),
             ">" => ops::Instruction::new(ops::Operator::Gt, None, None, pos),
             ">=" => ops::Instruction::new(ops::Operator::Ge, None, None, pos),
@@ -148,7 +123,7 @@ pub fn parse(
                 let unescaped_x = parse_char(x);
 
                 if unescaped_x.len() <= 1 {
-                    ops::Instruction::new(ops::Operator::Literal, Some(unescaped_x[0]), None, pos)
+                    ops::Instruction::new(ops::Operator::Literal, Some(unescaped_x[0].clone()), None, pos)
                 } else {
                     let res = ctx.write(&unescaped_x);
                     ops::Instruction::new(
@@ -201,29 +176,7 @@ pub fn parse(
                 i += 1;
                 continue;
             }
-            _ => match state {
-                Mode::Normal => {
-                    if !ctx.def.contains_key(&token) {
-                        report_err!(pos, "ukjent ord '{}'", token);
-                    }
-
-                    ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
-                }
-                Mode::Define => {
-                    ctx.def.insert(token.clone(), None);
-                    state = Mode::Normal;
-                    ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
-                }
-                Mode::Function => {
-                    ctx.def.insert(token.clone(), None);
-                    state = Mode::Normal;
-                    ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
-                }
-                Mode::Let => {
-                    ctx.def.insert(token.clone(), None);
-                    ops::Instruction::new(ops::Operator::Word, None, Some(token), pos)
-                }
-            },
+            _ => ops::Instruction::new(ops::Operator::Word, None, Some(token), pos),
         });
 
         i += 1

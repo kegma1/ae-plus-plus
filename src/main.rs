@@ -70,7 +70,7 @@ impl Runtime {
     }
 
     pub fn read(&self, ptr: ops::Ptr) -> Option<ops::Value> {
-        self.mem.get(ptr).copied()
+        self.mem.get(ptr).cloned()
     }
 
     pub fn read_data(&self, ptr: ops::Ptr, len: usize) -> Option<&[ops::Value]> {
