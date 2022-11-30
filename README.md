@@ -16,8 +16,9 @@ Programmeringsspråk på norsk
 - [ ] drop memory
 - [ ] scoping
 - [ ] implement pointer struct for memory safety
-- [ ] auto read write for memory with only one element
 - [ ] structure
+- [ ] var
+- [ ] local mem
 - [ ] Add import
 - [ ] Make better error system
 - [ ] Make better docs

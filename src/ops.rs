@@ -185,12 +185,11 @@ pub enum Operator {
     // Null
 }
 
-
 #[derive(Debug, PartialEq, Clone)]
 pub struct FuncPtr {
     pub ptr: usize,
     pub params: Vec<TypeLiteral>,
-    pub returns: Vec<TypeLiteral>
+    pub returns: Vec<TypeLiteral>,
 }
 
 // skal gjøre pekere bedre senere.

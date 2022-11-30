@@ -123,7 +123,12 @@ pub fn parse(
                 let unescaped_x = parse_char(x);
 
                 if unescaped_x.len() <= 1 {
-                    ops::Instruction::new(ops::Operator::Literal, Some(unescaped_x[0].clone()), None, pos)
+                    ops::Instruction::new(
+                        ops::Operator::Literal,
+                        Some(unescaped_x[0].clone()),
+                        None,
+                        pos,
+                    )
                 } else {
                     let res = ctx.write(&unescaped_x);
                     ops::Instruction::new(

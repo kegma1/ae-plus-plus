@@ -396,97 +396,97 @@ pub fn execute(
             }
             ops::Operator::End => {
                 if let Some(ptr) = token.arg {
-                    if let ops::Operator::Const = prg[ptr].op {
-                        check_stack_min!(
-                            ctx,
-                            token,
-                            1,
-                            "'konst' definisjon krever et element på toppen av stabelen"
-                        );
+                    match prg[ptr].op {
+                        ops::Operator::Const => {
+                            check_stack_min!(
+                                ctx,
+                                token,
+                                1,
+                                "'konst' definisjon krever et element på toppen av stabelen"
+                            );
 
-                        let val = ctx.pop().unwrap();
-                        let name = &prg[ptr + 1].name;
+                            let val = ctx.pop().unwrap();
+                            let name = &prg[ptr + 1].name;
 
-                        if let Some(key) = name {
-                            if ctx.def[key] != None {
-                                report_err!(
-                                    token.pos,
-                                    "'{}' kan ikke omdefineres ettersom den er konstant",
-                                    key
-                                );
+                            if let Some(key) = name {
+                                if ctx.def[key] != None {
+                                    report_err!(
+                                        token.pos,
+                                        "'{}' kan ikke omdefineres ettersom den er konstant",
+                                        key
+                                    );
+                                }
+                                ctx.def.insert(key.to_string(), Some(val));
+                            } else {
+                                return Err((
+                                    "Kunne ikke finne valid 'konst' navn",
+                                    token.pos.clone(),
+                                ));
                             }
-                            ctx.def.insert(key.to_string(), Some(val));
-                        } else {
-                            return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));
                         }
-                    } else if let ops::Operator::Mem = prg[ptr].op {
-                        check_stack_min!(
+                        ops::Operator::Mem => {
+                            check_stack_min!(
                             ctx,
                             token,
                             2,
                             "'minne' definisjon krever en type og en lengde på toppen av stabelen"
                         );
 
-                        let ops::Value::Int(len) = ctx.pop().unwrap() else {
+                            let ops::Value::Int(len) = ctx.pop().unwrap() else {
                             return Err((
                                 "Verdien på toppen av stabelen må være et positivt heltall",
                                 token.pos.clone(),
                             ));
                         };
-                        if len <= 0 {
-                            return Err((
+                            if len <= 0 {
+                                return Err((
                                 "Verdien på toppen av stabelen må være et positivt heltall og kan ikke vær null eller mindre",
                                 token.pos.clone(),
                             ));
-                        }
-                        let ops::Value::TypeLiteral(typ) = ctx.pop().unwrap() else {
+                            }
+                            let ops::Value::TypeLiteral(typ) = ctx.pop().unwrap() else {
                             return Err((
                                 "Verdien på toppen av stabelen må være en type",
                                 token.pos.clone(),
                             ));
                         };
-                        let name = &prg[ptr + 1].name;
+                            let name = &prg[ptr + 1].name;
 
-                        if let Some(key) = name {
-                            if ctx.def[key] != None {
-                                report_err!(
-                                    token.pos,
-                                    "'{}' kan ikke omdefineres ettersom den er konstant",
-                                    key
-                                );
-                            }
-
-                            let res = ctx.write(&vec![ops::Value::Null; len as usize]);
-                            let result = (res.0, res.1, typ);
-                            ctx.def
-                                .insert(key.to_string(), Some(ops::Value::Ptr(result)));
-                        } else {
-                            return Err(("Kunne ikke finne valid 'konst' navn", token.pos.clone()));
-                        }
-                    } else if let ops::Operator::Func = prg[ptr].op {
-                        let ret_val = ctx.pop();
-                        let ret_typ = ctx.retur();
-                        match (ret_val, ret_typ) {
-                            (Some(val), Some(typ)) => {
-                                if val.eq(&typ) {
-                                    ctx.push(val)
-                                } else {
+                            if let Some(key) = name {
+                                if ctx.def[key] != None {
                                     report_err!(
                                         token.pos,
-                                        "forventet '{:?}' men fant '{}'",
-                                        typ,
-                                        val
+                                        "'{}' kan ikke omdefineres ettersom den er konstant",
+                                        key
                                     );
                                 }
+
+                                let res = ctx.write(&vec![ops::Value::Null; len as usize]);
+                                let result = (res.0, res.1, typ);
+                                ctx.def
+                                    .insert(key.to_string(), Some(ops::Value::Ptr(result)));
+                            } else {
+                                return Err((
+                                    "Kunne ikke finne valid 'konst' navn",
+                                    token.pos.clone(),
+                                ));
                             }
-                            (None, Some(_)) => {
-                                return Err(("Fant ingen retur verdi", token.pos.clone()));
-                            }
-                            (_, _) => (),
                         }
-                        i = ctx.return_stack.pop().unwrap()
-                    } else {
-                        i = ptr;
+                        ops::Operator::Func => {
+                            let func = &prg[ptr + 1];
+                            let Some(func_name) = &func.name else {report_err!(token.pos, "fant ikke funksjons navn");};
+                            let Some(ops::Value::FuncPtr(func_ptr)) = ctx.def[func_name].clone() else {
+                                report_err!(token.pos, "fant ikke funksjons navn");
+                            };
+                            let Some(res) = ctx.retur(&func_ptr) else {
+                                report_err!(token.pos, "ikke rette retur verdier for funksjon '{}'", func_name);
+                            };
+
+                            i = res
+                        }
+                        _ => {
+                            i = ptr;
+                        }
                     }
                 }
             }
@@ -527,7 +527,7 @@ pub fn execute(
                     report_err!(token.pos, "Kunne ikke finne navn til minne");
                 }
                 i += 1
-            },
+            }
             ops::Operator::Const => {
                 let name = &prg[i + 1];
                 if name.op == ops::Operator::Word {
@@ -539,7 +539,7 @@ pub fn execute(
                     report_err!(token.pos, "Kunne ikke finne navn til konstant");
                 }
                 i += 1
-            },
+            }
             ops::Operator::Dup => {
                 if ctx.stack.len() < 1 {
                     return Err(("'dup' operator krever minst 1 argument", token.pos.clone()));
@@ -714,13 +714,15 @@ pub fn execute(
             }
             ops::Operator::Word => {
                 if let Some(key) = &token.name {
-                    if let Some(ops::Value::FuncPtr(func_ptr)) = &ctx.def[key] {
-                        ctx.return_stack.push(i);
-                        i = func_ptr.ptr
+                    if let Some(ops::Value::FuncPtr(func_ptr)) = ctx.def[key].clone() {
+                        let Some(res) = ctx.call(&func_ptr, i) else {
+                            report_err!(token.pos, "feil argumenter for funksjon '{}'", key);
+                        };
+                        i = res
                     } else if let Some(val) = &ctx.def[key] {
                         ctx.push(val.clone())
                     } else {
-                        report_err!(token.pos, "Ukjent ord {}", key);
+                        report_err!(token.pos, "Ukjent ord '{}'", key);
                     }
                 }
             }
@@ -748,15 +750,17 @@ pub fn execute(
                     while &prg[j].op != &ops::Operator::In {
                         let current_argument = &prg[j];
                         if !all_params_found {
-                            let Some(ops::Value::TypeLiteral(arg_typ)) = &current_argument.val else {
-                                report_err!(current_argument.pos, "Forventet 'TypeLitr' men fant {}", current_argument.val.as_ref().unwrap());
-                            };
-                            params.push(*arg_typ)
+                            match &current_argument.val {
+                                Some(ops::Value::TypeLiteral(arg_typ)) => {params.push(*arg_typ)},
+                                Some(_) => {report_err!(current_argument.pos, "Forventet 'TypeLitr' men fant {}", current_argument.val.as_ref().unwrap());},
+                                None => ()
+                            }
                         } else {
-                            let Some(ops::Value::TypeLiteral(arg_typ)) = &current_argument.val else {
-                                report_err!(current_argument.pos, "Forventet 'TypeLitr' men fant {}", current_argument.val.as_ref().unwrap());
-                            };
-                            returns.push(*arg_typ)
+                            match &current_argument.val {
+                                Some(ops::Value::TypeLiteral(arg_typ)) => {returns.push(*arg_typ)},
+                                Some(_) => {report_err!(current_argument.pos, "Forventet 'TypeLitr' men fant {}", current_argument.val.as_ref().unwrap());},
+                                None => ()
+                            }
                         }
 
                         if current_argument.op == ops::Operator::BikeShed {
@@ -769,64 +773,18 @@ pub fn execute(
                     let func_ptr = ops::FuncPtr {
                         ptr: j,
                         params,
-                        returns
+                        returns,
                     };
-                    
-                    ctx.def.insert(key.to_string(), Some(ops::Value::FuncPtr(func_ptr)));
+
+                    ctx.def
+                        .insert(key.to_string(), Some(ops::Value::FuncPtr(func_ptr)));
                 } else {
                     report_err!(token.pos, "Kunne ikke finne navn til funksjon");
                 }
                 i = token.arg.unwrap()
             }
             ops::Operator::In => {
-                if let ops::Operator::Func = prg[token.arg.unwrap()].op {
-                    let mut params: Vec<ops::TypeLiteral> = vec![];
-                    let mut params_collected = false;
-                    let mut ret_typ = None;
-                    while !params_collected {
-                        if let Some(ops::Value::TypeLiteral(_)) = ctx.peek() {
-                            let ops::Value::TypeLiteral(typ) = ctx.pop().unwrap() else {
-                            return Err(("Noe gikk galt med funksjons definisjonen", token.pos.clone()));
-                        };
-                            params.push(typ)
-                        } else if let Some(ops::Value::Null) = ctx.peek() {
-                            let _ = ctx.pop();
-                            match params.len() {
-                                0 => {
-                                    return Err(("Fant ingen return type", token.pos.clone()));
-                                }
-                                1 => ret_typ = params.pop(),
-                                _ => {
-                                    return Err((
-                                        "Kan ikke returnere mer enn en verdi omgangen",
-                                        token.pos.clone(),
-                                    ));
-                                }
-                            }
-                        } else {
-                            params_collected = true
-                        }
-                    }
-
-                    let mut params_value: Vec<ops::Value> = vec![];
-                    for typ in params {
-                        let stack_val = ctx.pop();
-                        if let Some(val) = stack_val {
-                            if val.eq(&typ) {
-                                params_value.push(val)
-                            } else {
-                                report_err!(token.pos, "Forventet '{:?}' men fant '{}'", typ, val);
-                            }
-                        } else {
-                            return Err((
-                                "Fant ikke nokk argumenter for funksjon",
-                                token.pos.clone(),
-                            ));
-                        }
-                    }
-                    params_value.reverse();
-                    ctx.swap(params_value, ret_typ)
-                } else if let ops::Operator::Let = &prg[token.arg.unwrap()].op {
+                if let ops::Operator::Let = &prg[token.arg.unwrap()].op {
                     let mut j = i - 1;
                     while let ops::Operator::Word = prg[j].op {
                         let val = ctx.pop().unwrap();
