@@ -381,6 +381,7 @@ pub fn execute(
 
                 if let ops::Value::Bool(x) = con {
                     if x {
+                        ctx.current_scope += 1;
                         i += 1;
                         continue;
                     } else {
@@ -395,6 +396,13 @@ pub fn execute(
                 }
             }
             ops::Operator::End => {
+                let def_copy = ctx.def.clone();
+                for (key, (_, scope)) in &def_copy {
+                    if scope >= &ctx.current_scope {
+                        ctx.def.remove(key);
+                    }
+                }
+                ctx.current_scope -= 1;
                 if let Some(ptr) = token.arg {
                     match prg[ptr].op {
                         ops::Operator::Const => {
@@ -409,14 +417,14 @@ pub fn execute(
                             let name = &prg[ptr + 1].name;
 
                             if let Some(key) = name {
-                                if ctx.def[key] != None {
+                                if let (Some(_), _) = ctx.def[key] {
                                     report_err!(
                                         token.pos,
                                         "'{}' kan ikke omdefineres ettersom den er konstant",
                                         key
                                     );
                                 }
-                                ctx.def.insert(key.to_string(), Some(val));
+                                ctx.def.insert(key.to_string(), (Some(val), ctx.current_scope));
                             } else {
                                 return Err((
                                     "Kunne ikke finne valid 'konst' navn",
@@ -453,7 +461,7 @@ pub fn execute(
                             let name = &prg[ptr + 1].name;
 
                             if let Some(key) = name {
-                                if ctx.def[key] != None {
+                                if let (Some(_), _) = ctx.def[key] {
                                     report_err!(
                                         token.pos,
                                         "'{}' kan ikke omdefineres ettersom den er konstant",
@@ -464,7 +472,7 @@ pub fn execute(
                                 let res = ctx.write(&vec![ops::Value::Null; len as usize]);
                                 let result = (res.0, res.1, typ);
                                 ctx.def
-                                    .insert(key.to_string(), Some(ops::Value::Ptr(result)));
+                                    .insert(key.to_string(), (Some(ops::Value::Ptr(result)), ctx.current_scope));
                             } else {
                                 return Err((
                                     "Kunne ikke finne valid 'konst' navn",
@@ -475,7 +483,7 @@ pub fn execute(
                         ops::Operator::Func => {
                             let func = &prg[ptr + 1];
                             let Some(func_name) = &func.name else {report_err!(token.pos, "fant ikke funksjons navn");};
-                            let Some(ops::Value::FuncPtr(func_ptr)) = ctx.def[func_name].clone() else {
+                            let (Some(ops::Value::FuncPtr(func_ptr)), _) = ctx.def[func_name].clone() else {
                                 report_err!(token.pos, "fant ikke funksjons navn");
                             };
                             let Some(res) = ctx.retur(&func_ptr) else {
@@ -493,6 +501,7 @@ pub fn execute(
             }
             ops::Operator::Else => {
                 if let Some(ptr) = token.arg {
+                    ctx.current_scope -= 1;
                     i = ptr;
                 }
             }
@@ -504,6 +513,7 @@ pub fn execute(
                 if let ops::Value::Bool(x) = con {
                     if x {
                         i += 1;
+                        ctx.current_scope += 1;
                         continue;
                     } else {
                         i = token.arg.unwrap();
@@ -523,7 +533,8 @@ pub fn execute(
                     let Some(key) = &name.name else {
                         report_err!(token.pos, "Kunne ikke finne navn");
                     };
-                    ctx.def.insert(key.to_string(), None);
+                    ctx.def.insert(key.to_string(), (None, ctx.current_scope));
+                    ctx.current_scope += 1;
                 } else {
                     report_err!(token.pos, "Kunne ikke finne navn til minne");
                 }
@@ -535,7 +546,8 @@ pub fn execute(
                     let Some(key) = &name.name else {
                         report_err!(token.pos, "Kunne ikke finne navn");
                     };
-                    ctx.def.insert(key.to_string(), None);
+                    ctx.def.insert(key.to_string(), (None, ctx.current_scope));
+                    ctx.current_scope += 1;
                 } else {
                     report_err!(token.pos, "Kunne ikke finne navn til konstant");
                 }
@@ -715,12 +727,12 @@ pub fn execute(
             }
             ops::Operator::Word => {
                 if let Some(key) = &token.name {
-                    if let Some(ops::Value::FuncPtr(func_ptr)) = ctx.def[key].clone() {
+                    if let Some((Some(ops::Value::FuncPtr(func_ptr)), _)) = ctx.def.clone().get(key) {
                         let Some(res) = ctx.call(&func_ptr, i) else {
                             report_err!(token.pos, "feil argumenter for funksjon '{}'", key);
                         };
                         i = res
-                    } else if let Some(val) = &ctx.def[key] {
+                    } else if let Some((Some(val), _)) = ctx.def.clone().get(key) {
                         ctx.push(val.clone())
                     } else {
                         report_err!(token.pos, "Ukjent ord '{}'", key);
@@ -778,7 +790,7 @@ pub fn execute(
                     };
 
                     ctx.def
-                        .insert(key.to_string(), Some(ops::Value::FuncPtr(func_ptr)));
+                        .insert(key.to_string(), (Some(ops::Value::FuncPtr(func_ptr)), ctx.current_scope));
                 } else {
                     report_err!(token.pos, "Kunne ikke finne navn til funksjon");
                 }
@@ -796,11 +808,12 @@ pub fn execute(
                 }
                 vars.reverse();
                 if let ops::Operator::In = prg[j].op {
+                    ctx.current_scope += 1;
                     for name in vars {
                         let Some(val) = ctx.pop() else {
                             report_err!(token.pos, "Ikke nokk verdier på stabelen for let-binding");
                         };
-                        ctx.def.insert(name.clone(), Some(val));
+                        ctx.def.insert(name.clone(), (Some(val), ctx.current_scope));
                     }
                     i = j
                 } else {

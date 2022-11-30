@@ -12,9 +12,9 @@ mod parse;
 pub struct Runtime {
     stack: Vec<ops::Value>,
     mem: Vec<ops::Value>,
-    pub current_scope: Option<usize>,
+    pub current_scope: usize,
     top: usize,
-    pub def: HashMap<String, Option<ops::Value>>,
+    pub def: HashMap<String, (Option<ops::Value>, usize)>,
     pub return_stack: Vec<usize>,
     frame_stack: Vec<Vec<ops::Value>>,
 }
@@ -28,7 +28,7 @@ impl Runtime {
             def: HashMap::new(),
             return_stack: vec![],
             frame_stack: vec![],
-            current_scope: None,
+            current_scope: 0,
         }
     }
 
@@ -71,7 +71,7 @@ impl Runtime {
         self.frame_stack.push(self.stack.clone());
         self.stack = new_stack;
         self.return_stack.push(i);
-        self.current_scope = Some(func.ptr);
+        self.current_scope += 1;
         Some(func.ptr)
     }
 
