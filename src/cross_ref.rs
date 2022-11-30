@@ -53,6 +53,7 @@ pub fn cross_reference(
                     prg[i].arg = Some(block_i);
                     prg[block_i].arg = Some(i);
                 } else if prg[block_i].op == ops::Operator::Let {
+                    prg[i].arg = Some(block_i);
                 }
             }
             ops::Operator::Do => {

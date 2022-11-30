@@ -484,6 +484,7 @@ pub fn execute(
 
                             i = res
                         }
+                        ops::Operator::Let => (),
                         _ => {
                             i = ptr;
                         }
@@ -783,24 +784,27 @@ pub fn execute(
                 }
                 i = token.arg.unwrap()
             }
-            ops::Operator::In => {
-                if let ops::Operator::Let = &prg[token.arg.unwrap()].op {
-                    let mut j = i - 1;
-                    while let ops::Operator::Word = prg[j].op {
-                        let val = ctx.pop().unwrap();
-                        let name = prg[j].name.as_ref().unwrap();
-                        ctx.def.insert(name.clone(), Some(val));
-                        j -= 1
-                    }
-                }
-            }
+            ops::Operator::In => (),
             ops::Operator::BikeShed => (),
             ops::Operator::Let => {
                 let mut j = i + 1;
+                let mut vars = vec![];
                 while let ops::Operator::Word = prg[j].op {
                     let name = prg[j].name.as_ref().unwrap();
-                    ctx.def.insert(name.clone(), None);
+                    vars.push(name);
                     j += 1
+                }
+                vars.reverse();
+                if let ops::Operator::In = prg[j].op {
+                    for name in vars {
+                        let Some(val) = ctx.pop() else {
+                            report_err!(token.pos, "Ikke nokk verdier på stabelen for let-binding");
+                        };
+                        ctx.def.insert(name.clone(), Some(val));
+                    }
+                    i = j
+                } else {
+                    report_err!(prg[j].pos, "forventet 'inni' men fant '{:?}'", prg[j].op);
                 }
             }
             ops::Operator::Debug => {
