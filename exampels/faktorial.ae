@@ -1,9 +1,9 @@
 funk fakult Helt -- Helt inni
-    dup 1 = hvis
+    hvis dup 1 = gjør
     ellers
         dup 1 - fakult *        
     slutt
 slutt
 
 
-10 fakult skriv
+5 fakult skrivnl

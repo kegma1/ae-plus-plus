@@ -14,10 +14,11 @@ Programmeringsspråk på norsk
 - [x] Add functions
 - [x] make printing better
 - [ ] drop memory
-- [ ] scoping
+- [x] scoping
 - [ ] implement pointer struct for memory safety
-- [ ] auto read write for memory with only one element
 - [ ] structure
+- [ ] var
+- [ ] local mem
 - [ ] Add import
 - [ ] Make better error system
 - [ ] Make better docs
@@ -109,7 +110,7 @@ I Æ++ vill nesten alt av operasjoner fungere på top elementene på stabelen. U
 |Flyt|`f32`|
 |bool|`bool`|
 |Str|`string`|
-|Peker|`Ptr`|
+|Pek|`Ptr`|
 |Bokst|`Char`|
 #
 ### omgjør
@@ -132,28 +133,42 @@ når du skriver minne navnet vil den dytte en peker til det første elementet i 
 du kan velge andre elementer i bufferen med '+' eller '-'. foreksempel hvis x har en lengde på 10 og peker til adresse 20 vil denne koden `x 5 +` skape en peker som peker til adresse 25.
 ```
 minne x Helt 3 slutt
-x 1 .
-x 1 + 2 .
-x 2 + 3 .
-x 1 + , skriv # skriver ut 2
+1 x ->
+2 x 1 + ->
+3 x 2 + ->
+x 1 + @ skrivnl # skriver ut 2
+
 ```
 minnet vil se ut som: |1|2|3| | | | |...
 #
 ### hvis og ellers
 ```
 "skriv et tall: " spør Int omgjør
-10 > hvis
+hvis 10 > gjør
     "større enn 10"
 ellers
     "mindre enn 10"
 slutt
-skriv
+skrivnl
+``` 
+#
+### ellvis
+```
+"skriv et tall: " spør Int omgjør
+hvis dup 10 > gjør
+    "større enn 10"
+ellvis dup 5 = gjør
+    "tallet er 5"
+ellers
+    "mindre enn 10"
+slutt
+skrivnl
 ``` 
 #
 ### når løkker
 ```
 0 når dup 15 <= gjør
-    dup skriv
+    dup skrivnl
     1 +
 slutt
 # skriver ut alle tallene fra 0 til 15
@@ -166,7 +181,7 @@ let x y z inni
     x z +
     y -
 slutt
-skriv # skriver ut 2
+skrivnl # skriver ut 2
 ```
 #
 ### funksjoner
@@ -177,18 +192,19 @@ Når funksjonen blir utført vil du bare ha tilgang til de verdiene som ble gitt
 funk sum Helt Helt -- Helt inni
     x
 slutt
-2 2 sum skriv # skriver-ut 4
+2 2 sum skrivnl # skriver-ut 4
 ```
 #
 ## Streng manipulasjon
 En streng er i bunn og grunn en peker til en bokstav buffer. dette vil si at hvis man ønsker å endre på en streng kan man omgjøre streng-pekeren til en standard peker ved hjelp av slik
 ```
-"hallo\n" Peker omgjør
-dup "m" . 1 +
-dup "o" . 1 +
-dup "r" . 1 +
-dup "d" . 1 +
-dup "i" . 1 +
+"hallo\n" Pek omgjør
+dup "m" snu -> 1 + feilsøk
+dup "o" snu -> 1 +
+dup "r" snu -> 1 +
+dup "d" snu -> 1 +
+dup "i" snu -> 1 +
 5 - Str omgjør 
-skriv # skriver ut mordi
+skrivnl # skriver ut mordi
 ```
+

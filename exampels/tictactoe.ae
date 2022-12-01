@@ -10,9 +10,9 @@ funk bytt_spiller inni
         spiller "x" .
     slutt
 slutt
-minne i Helt 1 slutt
 
 funk sjekk_rad -- Bool inni
+    minne i Helt 1 slutt
     i 0 .
     når i , 9 < gjør
     # bool int
@@ -29,6 +29,7 @@ funk sjekk_rad -- Bool inni
 slutt
 
 funk sjekk_kol -- Bool inni
+    minne i Helt 1 slutt
     i 0 .
     når i , 3 < gjør
         i , når dup i , 7 + < gjør

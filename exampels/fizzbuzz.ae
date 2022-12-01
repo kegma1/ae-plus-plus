@@ -1,17 +1,17 @@
 1 når dup 100 <= gjør
-    dup dup 5 / slipp 0 = snu 3 / slipp 0 = og hvis
+    hvis dup dup 5 / slipp 0 = snu 3 / slipp 0 = og gjør
         "fizzbuzz" 
-    ellers dup 3 / slipp 0 = hvis
+    ellvis dup 3 / slipp 0 = gjør
         "fizz" 
-    ellers dup 5 / slipp 0 = hvis
+    ellvis dup 5 / slipp 0 = gjør
         "buzz" 
     slutt
     
-    dup Helt = hvis
+    hvis dup Helt = gjør
         dup 
     slutt
 
-    skriv
-
+    skrivnl
+    
     1 +
 slutt

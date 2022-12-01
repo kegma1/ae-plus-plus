@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::{env, fmt};
 use termsize;
 
-
 mod cross_ref;
 mod execute;
 mod lex;
@@ -13,10 +12,11 @@ mod parse;
 pub struct Runtime {
     stack: Vec<ops::Value>,
     mem: Vec<ops::Value>,
+    pub current_scope: usize,
     top: usize,
-    pub def: HashMap<String, Option<ops::Value>>,
+    pub def: HashMap<String, (Option<ops::Value>, usize)>,
     pub return_stack: Vec<usize>,
-    frame_stack: Vec<(Vec<ops::Value>, Option<ops::TypeLiteral>)>,
+    frame_stack: Vec<Vec<ops::Value>>,
 }
 
 impl Runtime {
@@ -28,6 +28,7 @@ impl Runtime {
             def: HashMap::new(),
             return_stack: vec![],
             frame_stack: vec![],
+            current_scope: 0,
         }
     }
 
@@ -46,15 +47,50 @@ impl Runtime {
         }
     }
 
-    pub fn swap(&mut self, new_stack: Vec<ops::Value>, ret_typ: Option<ops::TypeLiteral>) {
-        self.frame_stack.push((self.stack.clone(), ret_typ));
-        self.stack = new_stack
+    pub fn call(&mut self, func: &ops::FuncPtr, i: usize) -> Option<usize> {
+        let new_stack: Vec<ops::Value> = {
+            let start = self.stack.len() - func.params.len();
+            let params: Vec<Option<ops::Value>> = self.stack.drain(start..)
+                .enumerate()
+                .map(|(j, par)| {
+                    if !par.eq(&func.params[j]) {
+                        return None;
+                    } else {Some(par)}
+                })
+                .collect();
+            let mut arg = vec![];
+            for par in params {
+                if let Some(x) = par {
+                    arg.push(x)
+                } else {
+                    return None;
+                }
+            }
+            arg
+        };
+        self.frame_stack.push(self.stack.clone());
+        self.stack = new_stack;
+        self.return_stack.push(i);
+        self.current_scope += 1;
+        Some(func.ptr)
     }
 
-    pub fn retur(&mut self) -> Option<ops::TypeLiteral> {
-        let (old_stack, ret_type) = self.frame_stack.pop().unwrap();
+    pub fn retur(&mut self, func: &ops::FuncPtr) -> Option<usize> {
+        let mut returned_items: Vec<ops::Value> = {
+            let start = self.stack.len() - func.returns.len();
+            let returns = self.stack.get(start..).unwrap();
+            for (j, par) in returns.iter().enumerate() {
+                if !par.eq(&func.returns[j]) {
+                    return None;
+                }
+            }
+            returns.into()
+        };
+
+        let old_stack = self.frame_stack.pop().unwrap();
         self.stack = old_stack;
-        ret_type
+        self.stack.append(&mut returned_items);
+        self.return_stack.pop()
     }
 
     pub fn write(&mut self, data: &Vec<ops::Value>) -> (ops::Ptr, usize) {
@@ -71,7 +107,7 @@ impl Runtime {
     }
 
     pub fn read(&self, ptr: ops::Ptr) -> Option<ops::Value> {
-        self.mem.get(ptr).copied()
+        self.mem.get(ptr).cloned()
     }
 
     pub fn read_data(&self, ptr: ops::Ptr, len: usize) -> Option<&[ops::Value]> {
@@ -112,7 +148,11 @@ impl fmt::Display for Runtime {
         if (stack.len() + 8) <= width {
             write!(f, "{}\n", stack)?;
         } else {
-            write!(f, "...{}\n", &stack[(stack.len() - (width - 11))..(stack.len() - 1)])?;
+            write!(
+                f,
+                "...{}\n",
+                &stack[(stack.len() - (width - 11))..(stack.len() - 1)]
+            )?;
         }
 
         write!(f, "Minne: ")?;
@@ -125,8 +165,7 @@ impl fmt::Display for Runtime {
         } else {
             write!(f, "{}...\n", &mem[0..(width - 10)])?;
         }
-        
-        
+
         Ok(())
     }
 }
@@ -180,4 +219,24 @@ fn run(path: &String) -> Result<u8, (&'static str, ops::Pos)> {
     let mut parsed = parse::parse(lexed, &mut ctx)?;
     let cross_refed = cross_ref::cross_reference(&mut parsed, &ctx)?;
     execute::execute(&mut ctx, &cross_refed)
+}
+
+#[macro_export]
+macro_rules! report_err {
+    ($tok:expr, $err_msg:expr) => {
+        return Err((
+            $err_msg,
+            $tok.clone(),
+        ))
+    };
+
+    ($pos:expr, $($arg:tt)*) => {
+        let err_s: String = format!($($arg)*).to_owned();
+        return Err((Box::leak(err_s.into_boxed_str()), $pos.clone()));
+    };
+
+    // ($pos:expr, $($arg:tt)*) => {
+    //     let err_s: String = format!($($arg)*).to_owned();
+    //     return Err((Box::leak(err_s.into_boxed_str()), $pos.clone()));
+    // };
 }

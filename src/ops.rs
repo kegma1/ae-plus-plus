@@ -25,16 +25,19 @@ impl fmt::Display for Instruction {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}, ", self.op).unwrap();
         if let Some(x) = self.arg {
-            write!(f, "{:?}, ", x).unwrap();
+            write!(f, "{}, ", x).unwrap();
         }
-        if let Some(x) = self.val {
-            write!(f, "{:?}, ", x).unwrap();
+        if let Some(x) = &self.val {
+            write!(f, "{}, ", x).unwrap();
+        }
+        if let Some(x) = &self.name {
+            write!(f, "{}, ", x).unwrap();
         }
         Ok(())
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Value {
     Int(i32),
     Float(f32),
@@ -45,7 +48,7 @@ pub enum Value {
     Ptr((Ptr, usize, TypeLiteral)), // ikke implementert
 
     TypeLiteral(TypeLiteral),
-    FuncPtr(usize),
+    FuncPtr(FuncPtr),
     Null,
 }
 
@@ -63,11 +66,17 @@ impl Value {
         }
     }
 
-    pub fn to_string(&self, ctx:& crate::Runtime) -> String {
+    pub fn to_string(&self, ctx: &crate::Runtime) -> String {
         match self {
             Value::Int(x) => x.to_string(),
             Value::Float(x) => x.to_string(),
-            Value::Bool(x) => if *x {String::from("sann")} else {String::from("usann")},
+            Value::Bool(x) => {
+                if *x {
+                    String::from("sann")
+                } else {
+                    String::from("usann")
+                }
+            }
             Value::Str(_) => ctx.read_str(self).unwrap(),
             Value::Byte(x) => String::from(format!("{:#02x}", x)),
             Value::Char(x) => x.to_string(),
@@ -163,6 +172,7 @@ pub enum Operator {
 
     If,   // Option<Ptr>
     Else, // Option<Ptr>
+    Elif, // Option<Ptr>
     End,  // Option<Ptr>
     Do,   // Option<Ptr>
     In,   //  Option<Ptr>
@@ -174,6 +184,13 @@ pub enum Operator {
     Over,
     Rot,
     // Null
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct FuncPtr {
+    pub ptr: usize,
+    pub params: Vec<TypeLiteral>,
+    pub returns: Vec<TypeLiteral>,
 }
 
 // skal gjøre pekere bedre senere.
