@@ -110,7 +110,7 @@ I Æ++ vill nesten alt av operasjoner fungere på top elementene på stabelen. U
 |Flyt|`f32`|
 |bool|`bool`|
 |Str|`string`|
-|Peker|`Ptr`|
+|Pek|`Ptr`|
 |Bokst|`Char`|
 #
 ### omgjør
@@ -133,10 +133,10 @@ når du skriver minne navnet vil den dytte en peker til det første elementet i 
 du kan velge andre elementer i bufferen med '+' eller '-'. foreksempel hvis x har en lengde på 10 og peker til adresse 20 vil denne koden `x 5 +` skape en peker som peker til adresse 25.
 ```
 minne x Helt 3 slutt
-x 1 .
-x 1 + 2 .
-x 2 + 3 .
-x 1 + , skrivnl # skriver ut 2
+1 x ->
+2 x 1 + ->
+3 x 2 + ->
+x 1 + @ skrivnl # skriver ut 2
 ```
 minnet vil se ut som: |1|2|3| | | | |...
 #
@@ -197,12 +197,12 @@ slutt
 ## Streng manipulasjon
 En streng er i bunn og grunn en peker til en bokstav buffer. dette vil si at hvis man ønsker å endre på en streng kan man omgjøre streng-pekeren til en standard peker ved hjelp av slik
 ```
-"hallo\n" Peker omgjør
-dup "m" . 1 +
-dup "o" . 1 +
-dup "r" . 1 +
-dup "d" . 1 +
-dup "i" . 1 +
+"hallo\n" Pek omgjør
+dup "m" snu -> 1 + feilsøk
+dup "o" snu -> 1 +
+dup "r" snu -> 1 +
+dup "d" snu -> 1 +
+dup "i" snu -> 1 +
 5 - Str omgjør 
 skrivnl # skriver ut mordi
 ```

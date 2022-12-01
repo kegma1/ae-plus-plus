@@ -51,8 +51,8 @@ pub fn parse(
             ">=" => ops::Instruction::new(ops::Operator::Ge, None, None, pos),
             "<" => ops::Instruction::new(ops::Operator::Lt, None, None, pos),
             "<=" => ops::Instruction::new(ops::Operator::Le, None, None, pos),
-            "," => ops::Instruction::new(ops::Operator::Read, None, None, pos),
-            "." => ops::Instruction::new(ops::Operator::Write, None, None, pos),
+            "@" => ops::Instruction::new(ops::Operator::Read, None, None, pos),
+            "->" => ops::Instruction::new(ops::Operator::Write, None, None, pos),
 
             "Helt" => ops::Instruction::new(
                 ops::Operator::Literal,
@@ -84,7 +84,7 @@ pub fn parse(
                 None,
                 pos,
             ),
-            "Peker" => ops::Instruction::new(
+            "Pek" => ops::Instruction::new(
                 ops::Operator::Literal,
                 Some(ops::Value::TypeLiteral(ops::TypeLiteral::Ptr)),
                 None,

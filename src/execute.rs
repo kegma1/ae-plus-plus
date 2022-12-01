@@ -701,10 +701,10 @@ pub fn execute(
                 }
             }
             ops::Operator::Write => {
-                check_stack_min!(ctx, token, 2, "'.' operator krever minst 2 argument");
+                check_stack_min!(ctx, token, 2, "'!' operator krever minst 2 argument");
 
-                let val = ctx.pop().unwrap(); // burde switches rundt, peker først så verdi
                 let ptr = ctx.pop().unwrap();
+                let val = ctx.pop().unwrap();
 
                 if let ops::Value::Ptr(x) = ptr {
                     if !val.eq(&x.2) {
@@ -713,7 +713,7 @@ pub fn execute(
                     ctx.over_write(x.0, &val)
                 } else {
                     return Err((
-                        "'.' operator krever at andre operator er en peker",
+                        "'!' operator krever at første operator er en peker",
                         token.pos.clone(),
                     ));
                 }

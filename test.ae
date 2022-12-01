@@ -1,5 +1,9 @@
-0 når dup 20 <= gjør
-    konst i dup 4 + slutt
-    i skrivnl
-    1 +
-slutt
+"hallo\n" Pek omgjør
+dup "m" snu -> 1 + feilsøk
+dup "o" snu -> 1 +
+dup "r" snu -> 1 +
+dup "d" snu -> 1 +
+dup "i" snu -> 1 +
+5 - Str omgjør 
+skrivnl # skriver ut mordi
+
