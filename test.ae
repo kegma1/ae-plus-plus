@@ -1,5 +1,5 @@
-usann hvis
-    1
-ellers
-    2
+0 når dup 20 <= gjør
+    konst i dup 4 + slutt
+    i skrivnl
+    1 +
 slutt

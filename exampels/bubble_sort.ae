@@ -28,7 +28,7 @@ funk sorter_list inni
             dup list +
             i , list +
             let a b inni
-                    a , b , > hvis
+                    hvis a , b , > gjør
                     a , b ,
                     a snu . b snu .
                 slutt

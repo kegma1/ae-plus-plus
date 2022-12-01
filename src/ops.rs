@@ -172,6 +172,7 @@ pub enum Operator {
 
     If,   // Option<Ptr>
     Else, // Option<Ptr>
+    Elif, // Option<Ptr>
     End,  // Option<Ptr>
     Do,   // Option<Ptr>
     In,   //  Option<Ptr>

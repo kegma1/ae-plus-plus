@@ -15,6 +15,7 @@ pub fn execute(
 ) -> Result<u8, (&'static str, ops::Pos)> {
     let mut i = 0;
     while i < prg.len() {
+        // println!("{}", ctx.current_scope);
         let token = &prg[i];
 
         match token.op {
@@ -374,27 +375,7 @@ pub fn execute(
                     }
                 }
             }
-            ops::Operator::If => {
-                check_stack_min!(ctx, token, 1, "'hvis' operator krever minst 1 argumentet");
-
-                let con = ctx.pop().unwrap();
-
-                if let ops::Value::Bool(x) = con {
-                    if x {
-                        ctx.current_scope += 1;
-                        i += 1;
-                        continue;
-                    } else {
-                        i = token.arg.unwrap();
-                    }
-                } else {
-                    report_err!(
-                        token.pos,
-                        "'ike {}' er ikke støttet. 'ike' only takes Bool",
-                        con
-                    );
-                }
-            }
+            ops::Operator::If => (),
             ops::Operator::End => {
                 let def_copy = ctx.def.clone();
                 for (key, (_, scope)) in &def_copy {
@@ -499,8 +480,14 @@ pub fn execute(
                     }
                 }
             }
-            ops::Operator::Else => {
+            ops::Operator::Else | ops::Operator::Elif => {
                 if let Some(ptr) = token.arg {
+                    let def_copy = ctx.def.clone();
+                    for (key, (_, scope)) in &def_copy {
+                    if scope >= &ctx.current_scope {
+                        ctx.def.remove(key);
+                    }
+                }
                     ctx.current_scope -= 1;
                     i = ptr;
                 }
@@ -516,7 +503,13 @@ pub fn execute(
                         ctx.current_scope += 1;
                         continue;
                     } else {
-                        i = token.arg.unwrap();
+                        let next_i = token.arg.unwrap();
+                        if prg[next_i].op == ops::Operator::Else {
+                            ctx.current_scope += 1;
+                            i = next_i
+                        } else {
+                            i = next_i
+                        }
                     }
                 } else {
                     report_err!(
@@ -839,6 +832,7 @@ pub fn execute(
                         &stack[(stack.len() - (width - 11))..(stack.len() - 1)]
                     );
                 }
+                print!("\n");
             }
         }
         // println!("{:?}", token.op);

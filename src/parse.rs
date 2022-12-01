@@ -30,6 +30,7 @@ pub fn parse(
             "eller" => ops::Instruction::new(ops::Operator::Or, None, None, pos),
             "hvis" => ops::Instruction::new(ops::Operator::If, None, None, pos),
             "ellers" => ops::Instruction::new(ops::Operator::Else, None, None, pos),
+            "ellvis" => ops::Instruction::new(ops::Operator::Elif, None, None, pos),
             "slutt" => ops::Instruction::new(ops::Operator::End, None, None, pos),
             "gjør" => ops::Instruction::new(ops::Operator::Do, None, None, pos),
             "inni" => ops::Instruction::new(ops::Operator::In, None, None, pos),
