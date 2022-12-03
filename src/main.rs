@@ -234,9 +234,4 @@ macro_rules! report_err {
         let err_s: String = format!($($arg)*).to_owned();
         return Err((Box::leak(err_s.into_boxed_str()), $pos.clone()));
     };
-
-    // ($pos:expr, $($arg:tt)*) => {
-    //     let err_s: String = format!($($arg)*).to_owned();
-    //     return Err((Box::leak(err_s.into_boxed_str()), $pos.clone()));
-    // };
 }

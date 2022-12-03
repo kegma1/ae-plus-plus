@@ -13,8 +13,9 @@ Programmeringsspråk på norsk
 - [x] Add Else-if
 - [x] Add functions
 - [x] make printing better
-- [ ] drop memory
 - [x] scoping
+- [x] syntax sugar
+- [ ] drop memory
 - [ ] implement pointer struct for memory safety
 - [ ] structure
 - [ ] var
@@ -198,7 +199,7 @@ slutt
 En streng er i bunn og grunn en peker til en bokstav buffer. dette vil si at hvis man ønsker å endre på en streng kan man omgjøre streng-pekeren til en standard peker ved hjelp av slik
 ```
 "hallo\n" Pek omgjør
-dup "m" snu -> 1 + feilsøk
+dup "m" snu -> 1 +
 dup "o" snu -> 1 +
 dup "r" snu -> 1 +
 dup "d" snu -> 1 +

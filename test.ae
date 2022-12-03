@@ -1,9 +1,19 @@
-"hallo\n" Pek omgjør
-dup "m" snu -> 1 + feilsøk
-dup "o" snu -> 1 +
-dup "r" snu -> 1 +
-dup "d" snu -> 1 +
-dup "i" snu -> 1 +
-5 - Str omgjør 
-skrivnl # skriver ut mordi
+minne buffer Helt 100 slutt
+minne i Helt 1 slutt
+0 ->i
 
+0 når dup 100 <= gjør
+    dup ->[@i]buffer
+    1 +
+    dup ->i
+slutt
+
+# strukt node
+#     data : Helt
+#     neste : Pek
+# slutt
+# 
+# var node_1 node slutt
+# 
+# 
+# 10 ->node_1.data # = 10 node_1 node.data + ->

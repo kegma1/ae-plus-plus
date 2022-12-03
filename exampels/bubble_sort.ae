@@ -4,16 +4,16 @@ minne list Helt N slutt
 
 funk last 
     Helt # data
-    Peker # list
+    Pek # list
     Helt # index
 inni
-    + snu .
+    + ->
 slutt
 
-funk skriv_ut_liste Str Peker inni
+funk skriv_ut_liste Str Pek inni
     snu skriv
     0 når dup N < gjør
-        over over + ,
+        over over + @
         Str omgjør ", " + skriv
         1 +
     slutt
@@ -22,20 +22,20 @@ slutt
 
 funk sorter_list inni
     minne i Helt 1 slutt
-    N 1 - i snu .
-    når i , 1 > gjør
-        0 når dup i , < gjør
+    N 1 - i ->
+    når i @ 1 > gjør
+        0 når dup i @ < gjør
             dup list +
-            i , list +
+            i @ list +
             let a b inni
-                    hvis a , b , > gjør
-                    a , b ,
-                    a snu . b snu .
+                    hvis a @ b @ > gjør
+                    a @ b @
+                    a -> b ->
                 slutt
             slutt
             1 +
         slutt slipp
-        i , 1 - i snu .
+        i @ 1 - i ->
     slutt
 slutt
 
