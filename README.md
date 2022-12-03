@@ -138,6 +138,7 @@ minne x Helt 3 slutt
 2 x 1 + ->
 3 x 2 + ->
 x 1 + @ skrivnl # skriver ut 2
+
 ```
 minnet vil se ut som: |1|2|3| | | | |...
 #
@@ -207,3 +208,4 @@ dup "i" snu -> 1 +
 5 - Str omgjør 
 skrivnl # skriver ut mordi
 ```
+
